@@ -8,6 +8,6 @@ const App = express();
 App.use(express.json());
 App.use(cookieParser());
 
-App.use("/api/auth", AuthRoutes);
+App.use('/api/Auth', AuthRoutes);
 
 module.exports = App;
