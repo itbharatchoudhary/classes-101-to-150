@@ -2,6 +2,8 @@ const Post = require("../Models/Post.model");
 const imagekit = require("../config/Imagekit");
 const getUserFromToken = require("../middleware/Auth");
 const { toFile } = require("@imagekit/nodejs");
+const mongoose = require("mongoose");
+
 
 // ===== CREATE POST =====
 const CreatePostController = async (req, res) => {
@@ -20,7 +22,6 @@ const CreatePostController = async (req, res) => {
       return res.status(400).json({ message: "Caption is required" });
     }
 
-    // Upload image to ImageKit
     const uploadResponse = await imagekit.files.upload({
       file: await toFile(req.file.buffer, req.file.originalname),
       fileName: `${Date.now()}-${req.file.originalname}`,
@@ -46,9 +47,15 @@ const CreatePostController = async (req, res) => {
 };
 
 
-// ===== GET ALL POSTS =====
+
+// ===== GET ALL POSTS (TOKEN REQUIRED) =====
 const GetAllPostsController = async (req, res) => {
   try {
+    const userId = getUserFromToken(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const posts = await Post.find()
       .populate("user", "username email profile")
       .sort({ createdAt: -1 });
@@ -65,7 +72,8 @@ const GetAllPostsController = async (req, res) => {
 };
 
 
-// ===== GET MY POSTS =====
+
+// ===== GET MY POSTS (TOKEN REQUIRED) =====
 const GetMyPostsController = async (req, res) => {
   try {
     const userId = getUserFromToken(req);
@@ -89,7 +97,43 @@ const GetMyPostsController = async (req, res) => {
 };
 
 
+
+// ===== GET SINGLE POST (OWNER ONLY) =====
+const GetSinglePostController = async (req, res) => {
+  try {
+    const userId = getUserFromToken(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const post = await Post.findById(req.params.id)
+      .populate("user", "username email profile");
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (post.user._id.toString() !== userId) {
+      return res.status(403).json({
+        message: "You can only view your own post",
+      });
+    }
+
+    res.status(200).json({
+      message: "Post fetched successfully",
+      post,
+    });
+
+  } catch (error) {
+    console.error("GET SINGLE POST ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
 // ===== DELETE POST =====
+
 const DeletePostController = async (req, res) => {
   try {
     const userId = getUserFromToken(req);
@@ -97,7 +141,14 @@ const DeletePostController = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const post = await Post.findById(req.params.id);
+    const postId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: "Invalid Post ID" });
+    }
+
+    const post = await Post.findById(postId);
+
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
@@ -106,9 +157,9 @@ const DeletePostController = async (req, res) => {
       return res.status(403).json({ message: "Forbidden" });
     }
 
-    // Delete image from ImageKit
+    // ✅ CORRECT IMAGEKIT DELETE
     if (post.img_fileId) {
-      await imagekit.files.deleteFile(post.img_fileId);
+      await imagekit.files.delete(post.img_fileId);
     }
 
     await post.deleteOne();
@@ -128,5 +179,6 @@ module.exports = {
   CreatePostController,
   GetAllPostsController,
   GetMyPostsController,
+  GetSinglePostController,
   DeletePostController,
 };
