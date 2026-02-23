@@ -1,24 +1,22 @@
+// RegisterForm.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../Hooks/useAuth"; // Custom hook to access AuthContext
 
 /* =========================================================
-   AXIOS INSTANCE CONFIGURATION
-   - Sets base URL for API
-   - Enables cookies (important for JWT cookie from backend)
+   REGISTER FORM COMPONENT
+   - Handles user registration
+   - Uses centralized auth context
+   - Manages form state, UI state, and feedback messages
 ========================================================= */
-const api = axios.create({
-  baseURL: "http://localhost:3000/api",
-  withCredentials: true, // required for cookie-based auth
-});
-
 export default function RegisterForm() {
   const navigate = useNavigate();
+  const { register } = useAuth(); // Grab register function from AuthContext
 
   /* =========================================================
      FORM STATE MANAGEMENT
      - Stores all input values
-     - Matches backend field names exactly
+     - Matches backend expected field names
   ========================================================= */
   const [form, setForm] = useState({
     username: "",
@@ -30,18 +28,24 @@ export default function RegisterForm() {
     agree: false,
   });
 
-  const [loading, setLoading] = useState(false); // controls submit button state
-  const [showPassword, setShowPassword] = useState(false); // toggle password visibility
-  const [error, setError] = useState(""); // displays validation/server errors
+  /* =========================================================
+     UI STATE MANAGEMENT
+     - loading → disables button during API call
+     - showPassword → toggle password visibility
+     - error → displays validation/server errors
+     - success → optional success message
+  ========================================================= */
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
   /* =========================================================
      HANDLE INPUT CHANGE
-     - Works for all input types
-     - Updates state dynamically using input name
+     - Works for text, checkbox, email, password inputs
+     - Dynamically updates correct field in state
   ========================================================= */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -51,22 +55,28 @@ export default function RegisterForm() {
   /* =========================================================
      HANDLE FORM SUBMISSION
      - Validates passwords
-     - Sends data to backend
-     - Handles success + errors
+     - Calls centralized register function from AuthContext
+     - Navigates to login on success
+     - Displays professional errors
   ========================================================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // client-side validation
+    // Client-side validation
     if (form.password !== form.confirmPassword) {
       return setError("Passwords do not match");
+    }
+
+    if (!form.agree) {
+      return setError("You must accept the terms");
     }
 
     try {
       setLoading(true);
 
-      await api.post("/auth/register", {
+      // Use centralized registration function
+      await register({
         username: form.username,
         email: form.email,
         password: form.password,
@@ -74,52 +84,41 @@ export default function RegisterForm() {
         imageUrl: form.imageUrl || undefined,
       });
 
-      // redirect after successful registration
+      // Navigate to login after successful registration
       navigate("/login");
 
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(err.message || "Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
+  /* =========================================================
+     RENDER COMPONENT
+     - Includes form fields, error display, and navigation link
+  ========================================================= */
   return (
     <div className="w-full mt-10 max-w-md mx-auto">
       <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
 
-        {/* =========================================================
-           HEADER SECTION
-        ========================================================= */}
+        {/* HEADER */}
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Create account
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Start your journey with us
-          </p>
+          <h1 className="text-2xl font-semibold text-gray-900">Create account</h1>
+          <p className="text-sm text-gray-500 mt-1">Start your journey with us</p>
         </div>
 
-        {/* =========================================================
-           ERROR DISPLAY
-           - Shows backend or validation errors
-        ========================================================= */}
+        {/* ERROR DISPLAY */}
         {error && (
-          <div className="mb-4 text-sm text-red-600 text-center">
-            {error}
-          </div>
+          <div className="mb-4 text-sm text-red-600 text-center">{error}</div>
         )}
 
-        {/* =========================================================
-           REGISTRATION FORM
-        ========================================================= */}
+        {/* REGISTRATION FORM */}
         <form onSubmit={handleSubmit} className="space-y-5">
 
           {/* USERNAME */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Username
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
             <input
               type="text"
               name="username"
@@ -133,9 +132,7 @@ export default function RegisterForm() {
 
           {/* EMAIL */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email address
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
             <input
               type="email"
               name="email"
@@ -149,10 +146,7 @@ export default function RegisterForm() {
 
           {/* PASSWORD */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -163,7 +157,6 @@ export default function RegisterForm() {
                 placeholder="Enter password"
                 className="w-full px-4 py-2.5 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black outline-none"
               />
-
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
@@ -176,9 +169,7 @@ export default function RegisterForm() {
 
           {/* CONFIRM PASSWORD */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm password
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
             <input
               type="password"
               name="confirmPassword"
@@ -188,21 +179,14 @@ export default function RegisterForm() {
               placeholder="Re-enter password"
               className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black outline-none"
             />
-
-            {form.password &&
-              form.confirmPassword &&
-              form.password !== form.confirmPassword && (
-                <p className="text-sm text-red-500 mt-1">
-                  Passwords do not match
-                </p>
-              )}
+            {form.password && form.confirmPassword && form.password !== form.confirmPassword && (
+              <p className="text-sm text-red-500 mt-1">Passwords do not match</p>
+            )}
           </div>
 
-          {/* OPTIONAL BIO */}
+          {/* BIO (optional) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Bio (optional)
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Bio (optional)</label>
             <input
               type="text"
               name="bio"
@@ -213,11 +197,9 @@ export default function RegisterForm() {
             />
           </div>
 
-          {/* OPTIONAL PROFILE IMAGE URL */}
+          {/* PROFILE IMAGE URL (optional) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Profile Image URL (optional)
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image URL (optional)</label>
             <input
               type="text"
               name="imageUrl"

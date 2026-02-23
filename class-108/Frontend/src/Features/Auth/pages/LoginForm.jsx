@@ -1,44 +1,47 @@
+// LoginForm.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../Hooks/useAuth"; // Use our custom hook to access auth context
 
 /* =========================================================
-   AXIOS INSTANCE
-   - Central API configuration
-   - Enables cookie authentication
-   - Prevents repeating base URL everywhere
+   LOGIN FORM COMPONENT
+   - Handles user login
+   - Uses centralized auth context
+   - Manages form state, UI state, and feedback messages
 ========================================================= */
-const api = axios.create({
-  baseURL: "http://localhost:3000/api",
-  withCredentials: true, // required for JWT cookie auth
-});
-
 export default function LoginForm() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Grab login function from context
 
   /* =========================================================
      FORM STATE MANAGEMENT
-     - Stores user input
-     - Backend expects: identifier + password
+     - Stores user input values
+     - identifier = username or email
   ========================================================= */
   const [form, setForm] = useState({
-    identifier: "", // email OR username
+    identifier: "",
     password: "",
-    remember: false, // UI only (optional feature)
+    remember: false, // UI-only feature
   });
 
-  const [loading, setLoading] = useState(false); // controls button state
-  const [showPassword, setShowPassword] = useState(false); // toggle visibility
-  const [error, setError] = useState(""); // shows error messages
+  /* =========================================================
+     UI STATE MANAGEMENT
+     - loading → disables submit button during API call
+     - showPassword → toggles password visibility
+     - error → displays validation or server errors
+     - success → shows success message
+  ========================================================= */
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   /* =========================================================
      HANDLE INPUT CHANGE
-     - Works for text + checkbox
-     - Updates correct field dynamically
+     - Updates state for text inputs and checkbox
   ========================================================= */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -47,65 +50,70 @@ export default function LoginForm() {
 
   /* =========================================================
      HANDLE FORM SUBMISSION
-     - Sends login request to backend
-     - Stores cookie automatically
-     - Redirects after success
+     - Calls login function from context
+     - Provides professional UX feedback
+     - Redirects on successful login
   ========================================================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
+
+    // Basic validation
+    if (!form.identifier || !form.password) {
+      return setError("Please enter email/username and password");
+    }
 
     try {
       setLoading(true);
 
-      await api.post("/auth/login", {
-        identifier: form.identifier,
-        password: form.password,
-      });
+      // Use centralized login function from AuthContext
+      await login(form.identifier, form.password);
 
-      alert("Login successful ✅ Welcome back!");
+      // Success feedback
+      setSuccess("Login successful. Redirecting...");
 
-      // after successful login → redirect to home/dashboard
-      navigate("/");
+      // Redirect after short delay
+      setTimeout(() => {
+        navigate("/");
+      }, 1200);
 
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      // Show backend or generic error
+      setError(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
 
+  /* =========================================================
+     RENDER COMPONENT
+     - Includes form, error/success messages, and navigation
+  ========================================================= */
   return (
     <div className="w-full mt-10 max-w-md mx-auto">
       <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
 
-        {/* =========================================================
-           HEADER
-        ========================================================= */}
+        {/* HEADER */}
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Welcome back
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Sign in to your account
-          </p>
+          <h1 className="text-2xl font-semibold text-gray-900">Welcome back</h1>
+          <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
         </div>
 
-        {/* =========================================================
-           ERROR DISPLAY
-        ========================================================= */}
+        {/* ERROR MESSAGE */}
         {error && (
-          <div className="mb-4 text-sm text-red-600 text-center">
-            {error}
-          </div>
+          <div className="mb-4 text-sm text-red-600 text-center">{error}</div>
         )}
 
-        {/* =========================================================
-           LOGIN FORM
-        ========================================================= */}
+        {/* SUCCESS MESSAGE */}
+        {success && (
+          <div className="mb-4 text-sm text-green-600 text-center">{success}</div>
+        )}
+
+        {/* LOGIN FORM */}
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* IDENTIFIER INPUT (EMAIL OR USERNAME) */}
+          {/* IDENTIFIER INPUT */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email or Username
@@ -126,7 +134,6 @@ export default function LoginForm() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
-
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -137,7 +144,6 @@ export default function LoginForm() {
                 placeholder="Enter password"
                 className="w-full px-4 py-2.5 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black outline-none"
               />
-
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
@@ -148,7 +154,7 @@ export default function LoginForm() {
             </div>
           </div>
 
-          {/* REMEMBER CHECKBOX (UI FEATURE ONLY) */}
+          {/* REMEMBER ME */}
           <label className="flex items-center gap-2 text-sm text-gray-600">
             <input
               type="checkbox"
@@ -173,7 +179,10 @@ export default function LoginForm() {
         {/* NAVIGATION TO REGISTER */}
         <p className="text-sm text-gray-500 text-center mt-6">
           Don’t have an account?{" "}
-          <Link to="/register" className="text-black font-medium hover:underline">
+          <Link
+            to="/register"
+            className="text-black font-medium hover:underline"
+          >
             Register
           </Link>
         </p>
