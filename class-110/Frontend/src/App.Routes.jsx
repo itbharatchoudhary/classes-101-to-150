@@ -9,9 +9,12 @@ import Feed from "./Features/Post/Pages/Feed";
 
 /*
 IMPORT PURPOSE:
-- BrowserRouter, Routes, Route, Navigate, Outlet → React Router v6 tools for navigation
-- useAuth → access authentication state for protected/public routes
-- LoginForm, RegisterForm, Feed → page components for routing
+- BrowserRouter → wraps the entire app for routing
+- Routes, Route → define application paths
+- Navigate → programmatic redirects for authentication
+- Outlet → placeholder for nested child routes
+- useAuth → access global authentication state
+- Page components → LoginForm, RegisterForm, Feed
 */
 
 
@@ -19,55 +22,57 @@ IMPORT PURPOSE:
 // PROTECTED ROUTE COMPONENT
 // ============================================
 function ProtectedRoute() {
-  const { isAuth } = useAuth();
-  return isAuth ? <Outlet /> : <Navigate to="/login" replace />;
-}
+  const { isAuthenticated } = useAuth(); // ✅ Correct context property
 
-/*
-PROTECTED ROUTE PURPOSE:
-- Ensures only authenticated users can access child routes
-- Redirects unauthenticated users to /login
-- Uses Outlet to render nested routes
-*/
+  /*
+  LOGIC PURPOSE:
+  - If user is logged in (isAuthenticated = true), render child routes via <Outlet />
+  - If not logged in, redirect to "/login"
+  */
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+}
 
 
 // ============================================
 // PUBLIC ROUTE COMPONENT
 // ============================================
 function PublicRoute() {
-  const { isAuth } = useAuth();
-  return !isAuth ? <Outlet /> : <Navigate to="/feed" replace />;
-}
+  const { isAuthenticated } = useAuth(); // ✅ Correct context property
 
-/*
-PUBLIC ROUTE PURPOSE:
-- Prevents logged-in users from visiting login/register pages
-- Redirects authenticated users to /feed
-- Uses Outlet for nested route rendering
-*/
+  /*
+  LOGIC PURPOSE:
+  - Prevent logged-in users from accessing login/register pages
+  - If user is NOT authenticated, render child routes via <Outlet />
+  - If authenticated, redirect to "/feed"
+  */
+  return !isAuthenticated ? <Outlet /> : <Navigate to="/feed" replace />;
+}
 
 
 // ============================================
-// CENTRAL ROUTING CONFIGURATION
+// APP ROUTES
 // ============================================
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* Default redirect to feed */}
+        {/* Default route "/" → redirect to feed */}
         <Route path="/" element={<Navigate to="/feed" replace />} />
 
-        {/* Public pages (login, register) */}
+        {/* PUBLIC PAGES → Login/Register */}
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
         </Route>
 
-        {/* Protected pages (feed) */}
+        {/* PROTECTED PAGES → Feed (other pages can be added) */}
         <Route element={<ProtectedRoute />}>
           <Route path="/feed" element={<Feed />} />
         </Route>
+
+        {/* Catch-all → redirect unknown routes to "/" */}
+        <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
     </BrowserRouter>
@@ -75,23 +80,10 @@ export default function AppRoutes() {
 }
 
 /*
-ROUTING PURPOSE:
-✔ Provides centralized navigation system
-✔ Handles authentication-based access control
-✔ Uses ProtectedRoute/PublicRoute for security and user experience
-✔ Scalable structure for adding new pages/routes
-*/
-
-
-// ============================================
-// MODULE SUMMARY
-// ============================================
-
-/*
-This module defines all application routes:
-✔ /login and /register → public routes accessible only to unauthenticated users
-✔ /feed → protected route for authenticated users only
-✔ Default "/" → redirects to /feed
-✔ Clean separation between public and protected routing logic
-✔ Ensures security and UX by redirecting users based on authentication state
+MODULE SUMMARY:
+✔ Centralized routing system for the app
+✔ ProtectedRoute → secures authenticated pages
+✔ PublicRoute → prevents logged-in users from accessing auth pages
+✔ Default redirect and 404 fallback implemented
+✔ Clean, maintainable, and scalable for future pages
 */

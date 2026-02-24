@@ -1,78 +1,38 @@
 // ============================================
 // IMPORTS
 // ============================================
-
 import axios from "axios";
 
-/*
-IMPORT PURPOSE:
-- axios → handles HTTP communication with backend
-- centralizes network logic for authentication
-*/
-
-
 // ============================================
-// API BASE URL RESOLUTION
+// API BASE URL
 // ============================================
-
 const BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api/auth";
 
-/*
-BASE URL PURPOSE:
-- Uses environment variable if provided
-- Falls back to local backend during development
-- Supports both production and development environments
-*/
-
-
 // ============================================
-// AXIOS INSTANCE CONFIGURATION
+// AXIOS INSTANCE
 // ============================================
-
 const API = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
-/*
-AXIOS INSTANCE PURPOSE:
-- Central configuration for auth-related requests
-- Automatically sends authentication cookies
-- Ensures JSON request format
-- Keeps network configuration consistent across app
-*/
-
-
 // ============================================
-// REGISTER USER API
+// REGISTER USER
 // ============================================
-
 export const registerUser = async (userData) => {
   try {
     const response = await API.post("/register", userData);
     return response.data;
   } catch (error) {
-    // Throws backend error if available, otherwise default message
     throw error.response?.data || { message: "Registration failed" };
   }
 };
 
-/*
-REGISTER PURPOSE:
-- Sends user registration data to backend
-- Backend creates account and may set authentication cookie
-- Returns server response for UI consumption
-*/
-
-
 // ============================================
-// LOGIN USER API
+// LOGIN USER
 // ============================================
-
 export const loginUser = async (credentials) => {
   try {
     const response = await API.post("/login", credentials);
@@ -82,18 +42,9 @@ export const loginUser = async (credentials) => {
   }
 };
 
-/*
-LOGIN PURPOSE:
-- Sends login credentials to backend
-- Backend validates credentials and sets authentication cookie
-- Returns authentication response for UI and context management
-*/
-
-
 // ============================================
-// LOGOUT USER API
+// LOGOUT USER
 // ============================================
-
 export const logoutUser = async () => {
   try {
     const response = await API.post("/logout");
@@ -103,30 +54,36 @@ export const logoutUser = async () => {
   }
 };
 
-/*
-LOGOUT PURPOSE:
-- Calls backend logout endpoint
-- Backend clears authentication cookie
-- Ends user session on frontend and backend
-*/
-
+// ============================================
+// GET CURRENT USER (SESSION RESTORE)
+// ============================================
+export const getCurrentUser = async () => {
+  try {
+    const response = await API.get("/me");
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to get user session" };
+  }
+};
 
 // ============================================
-// AUTH SERVICE EXPORT
+// EXPORT
 // ============================================
-
 const AuthAPI = {
   registerUser,
   loginUser,
   logoutUser,
+  getCurrentUser,
 };
 
 export default AuthAPI;
 
 /*
-EXPORT PURPOSE / SERVICE RESPONSIBILITIES:
-✔ Provides a single access point for all authentication-related API calls
-✔ Simplifies imports across the application
-✔ Keeps service architecture clean, maintainable, and scalable
-✔ Ensures consistent error handling for authentication requests
+COMMENT:
+This service handles all authentication-related API calls:
+✔ registerUser → create account
+✔ loginUser → authenticate
+✔ logoutUser → end session
+✔ getCurrentUser → restore session on page reload
+Consistent error handling ensures UI can display proper messages.
 */
