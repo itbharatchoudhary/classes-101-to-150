@@ -1,23 +1,38 @@
-// RegisterForm.jsx
+// ============================================
+// IMPORTS
+// ============================================
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../Hooks/useAuth"; // Custom hook to access AuthContext
+import { useAuth } from "../Hooks/useAuth";
 
-/* =========================================================
-   REGISTER FORM COMPONENT
-   - Handles user registration
-   - Uses centralized auth context
-   - Manages form state, UI state, and feedback messages
-========================================================= */
+/*
+IMPORT PURPOSE:
+- useState → manages local form and UI state
+- useNavigate → programmatic navigation after registration
+- useAuth → provides centralized authentication actions via context
+*/
+
+
+// ============================================
+// REGISTER FORM COMPONENT
+// ============================================
+
 export default function RegisterForm() {
   const navigate = useNavigate();
-  const { register } = useAuth(); // Grab register function from AuthContext
+  const { register } = useAuth();
 
-  /* =========================================================
-     FORM STATE MANAGEMENT
-     - Stores all input values
-     - Matches backend expected field names
-  ========================================================= */
+  /*
+  COMPONENT SETUP PURPOSE:
+  - navigate → handles page redirection after successful registration
+  - register → calls backend to create new user
+  */
+
+
+  // ============================================
+  // FORM STATE MANAGEMENT
+  // ============================================
+
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -28,37 +43,54 @@ export default function RegisterForm() {
     agree: false,
   });
 
-  /* =========================================================
-     UI STATE MANAGEMENT
-     - loading → disables button during API call
-     - showPassword → toggle password visibility
-     - error → displays validation/server errors
-     - success → optional success message
-  ========================================================= */
+  /*
+  FORM STATE PURPOSE:
+  - Stores all user input values
+  - Matches backend expected fields
+  - Includes optional profile data for bio and image
+  */
+
+
+  // ============================================
+  // UI STATE MANAGEMENT
+  // ============================================
+
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
-  /* =========================================================
-     HANDLE INPUT CHANGE
-     - Works for text, checkbox, email, password inputs
-     - Dynamically updates correct field in state
-  ========================================================= */
+  /*
+  UI STATE PURPOSE:
+  - loading → disables submit button during API call
+  - showPassword → toggles password visibility
+  - error → displays validation or server errors
+  */
+
+
+  // ============================================
+  // HANDLE INPUT CHANGE
+  // ============================================
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  /* =========================================================
-     HANDLE FORM SUBMISSION
-     - Validates passwords
-     - Calls centralized register function from AuthContext
-     - Navigates to login on success
-     - Displays professional errors
-  ========================================================= */
+  /*
+  INPUT HANDLER PURPOSE:
+  - Dynamically updates form state
+  - Supports text, email, password, and checkbox inputs
+  */
+
+
+  // ============================================
+  // HANDLE FORM SUBMISSION
+  // ============================================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -67,7 +99,6 @@ export default function RegisterForm() {
     if (form.password !== form.confirmPassword) {
       return setError("Passwords do not match");
     }
-
     if (!form.agree) {
       return setError("You must accept the terms");
     }
@@ -75,7 +106,7 @@ export default function RegisterForm() {
     try {
       setLoading(true);
 
-      // Use centralized registration function
+      // Call register function from AuthContext
       await register({
         username: form.username,
         email: form.email,
@@ -84,7 +115,7 @@ export default function RegisterForm() {
         imageUrl: form.imageUrl || undefined,
       });
 
-      // Navigate to login after successful registration
+      // Redirect user to login page after successful registration
       navigate("/login");
 
     } catch (err) {
@@ -94,10 +125,20 @@ export default function RegisterForm() {
     }
   };
 
-  /* =========================================================
-     RENDER COMPONENT
-     - Includes form fields, error display, and navigation link
-  ========================================================= */
+  /*
+  SUBMISSION FLOW PURPOSE:
+  - Prevents default form submission
+  - Performs client-side validation
+  - Sends registration data to backend
+  - Redirects to login page on success
+  - Handles errors and updates UI feedback
+  */
+
+
+  // ============================================
+  // RENDER COMPONENT UI
+  // ============================================
+
   return (
     <div className="w-full mt-10 max-w-md mx-auto">
       <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
@@ -108,7 +149,7 @@ export default function RegisterForm() {
           <p className="text-sm text-gray-500 mt-1">Start your journey with us</p>
         </div>
 
-        {/* ERROR DISPLAY */}
+        {/* ERROR MESSAGE */}
         {error && (
           <div className="mb-4 text-sm text-red-600 text-center">{error}</div>
         )}
@@ -184,7 +225,7 @@ export default function RegisterForm() {
             )}
           </div>
 
-          {/* BIO (optional) */}
+          {/* BIO (OPTIONAL) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Bio (optional)</label>
             <input
@@ -197,7 +238,7 @@ export default function RegisterForm() {
             />
           </div>
 
-          {/* PROFILE IMAGE URL (optional) */}
+          {/* PROFILE IMAGE URL (OPTIONAL) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image URL (optional)</label>
             <input
@@ -210,7 +251,7 @@ export default function RegisterForm() {
             />
           </div>
 
-          {/* TERMS AGREEMENT */}
+          {/* TERMS AND CONDITIONS */}
           <label className="flex items-start gap-2 text-sm text-gray-600">
             <input
               type="checkbox"
@@ -233,7 +274,7 @@ export default function RegisterForm() {
           </button>
         </form>
 
-        {/* NAVIGATION TO LOGIN */}
+        {/* LOGIN LINK */}
         <p className="text-sm text-gray-500 text-center mt-6">
           Already have an account?{" "}
           <Link to="/login" className="text-black font-medium hover:underline">
@@ -243,4 +284,24 @@ export default function RegisterForm() {
       </div>
     </div>
   );
+
+  /*
+  UI PURPOSE:
+  - Displays registration form with validation
+  - Provides optional fields for bio and profile image
+  - Shows dynamic error messages
+  - Handles password visibility toggle
+  - Navigates to login page after successful registration
+  */
 }
+
+
+/*
+COMPONENT RESPONSIBILITIES / SUMMARY:
+✔ Manages registration form state and UI state
+✔ Handles user input and client-side validation
+✔ Integrates with centralized authentication context (register function)
+✔ Displays dynamic success and error messages
+✔ Redirects newly registered users to login page
+✔ Provides professional, clean, and accessible UI structure
+*/

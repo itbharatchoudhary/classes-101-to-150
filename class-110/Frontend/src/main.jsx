@@ -1,27 +1,82 @@
+// ============================================
+// IMPORTS
+// ============================================
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+
 import "./index.css";
 import App from "./App.jsx";
 
 import { AuthProvider } from "./Features/Auth/Auth.Context";
-// Global authentication provider that manages user state across the app
+import { PostProvider } from "./Features/Post/Post.Context";
+
+/*
+IMPORT GROUP PURPOSE:
+- React core rendering tools → StrictMode, createRoot
+- Global stylesheet → index.css
+- Root application component → App
+- Global state providers → AuthProvider, PostProvider
+- Ensures application has access to authentication & post context globally
+*/
 
 
-/* =========================================================
-   APPLICATION ENTRY POINT
-   - Renders React app into the DOM
-   - Wraps application with global providers
-========================================================= */
-createRoot(document.getElementById("root")).render(
+// ============================================
+// ROOT DOM CONTAINER
+// ============================================
+const rootElement = document.getElementById("root");
+
+/*
+ROOT ELEMENT PURPOSE:
+- Connects React application to the HTML DOM
+- Must match <div id="root"></div> in index.html
+*/
+
+
+// ============================================
+// APPLICATION RENDERING
+// ============================================
+createRoot(rootElement).render(
   <StrictMode>
-    {/* =====================================================
-       AUTH PROVIDER WRAPPER
-       - Makes authentication state available globally
-       - Enables login/logout access from any component
-       - Required for protected routes and user persistence
-    ===================================================== */}
     <AuthProvider>
-      <App />
+      <PostProvider>
+        <App />
+      </PostProvider>
     </AuthProvider>
   </StrictMode>
 );
+
+/*
+RENDER TREE PURPOSE:
+1️⃣ StrictMode
+   - Activates React development checks
+   - Helps detect unsafe lifecycle usage
+   - Runs extra validations in development only
+
+2️⃣ AuthProvider
+   - Provides global authentication state
+   - Enables protected routes and login persistence
+   - Makes login/logout functions available anywhere
+
+3️⃣ PostProvider
+   - Provides global post/feed state
+   - Fetches posts after authentication
+   - Makes posts accessible across components
+
+4️⃣ App Component
+   - Root UI of the application
+   - Contains routing system via AppRoutes
+   - Controls page navigation and structure
+*/
+
+
+// ============================================
+// FILE RESPONSIBILITIES
+// ============================================
+/*
+✔ Bootstraps the React application
+✔ Connects React to DOM
+✔ Wraps the app with global state providers (Auth + Post)
+✔ Enables authentication-aware UI
+✔ Enables centralized post/feed management
+✔ Keeps entry point minimal, clear, and scalable
+*/
