@@ -4,124 +4,89 @@ import axios from "axios";
 ======================================================
 AXIOS INSTANCE
 ======================================================
-Central HTTP client used across auth system
-
-- baseURL → backend auth routes
-- withCredentials → sends session cookie
-- Single place to configure API behavior
+Handles communication with backend auth API
+Automatically sends JWT cookie
 */
 
 const API = axios.create({
   baseURL: "http://localhost:3000/api/auth",
   withCredentials: true,
+  headers: { "Content-Type": "application/json" },
 });
 
 /*
 ======================================================
-AUTH REQUEST FUNCTIONS
+GLOBAL ERROR HANDLER
 ======================================================
-Each function communicates with backend
-Backend is responsible for MongoDB interaction
-
-Frontend NEVER talks to MongoDB directly
-It talks to backend → backend talks to MongoDB
+Normalizes backend error messages
 */
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      "Request failed";
+    return Promise.reject({ message });
+  }
+);
 
 /*
 ======================================================
-REGISTER USER
+AUTH API CALLS
 ======================================================
-Creates MongoDB user
-Backend returns authenticated user
+Frontend → Backend → MongoDB
 */
+
 export const registerUser = async (data) => {
-  return await API.post("/register", data);
+  const res = await API.post("/register", data);
+  return res.data;
 };
 
-/*
-======================================================
-LOGIN USER
-======================================================
-Verifies credentials in MongoDB
-Backend creates session cookie
-*/
 export const loginUser = async (data) => {
-  return await API.post("/login", data);
+  const res = await API.post("/login", data);
+  return res.data;
 };
 
-/*
-======================================================
-LOGOUT USER
-======================================================
-Destroys session in backend
-Clears authentication cookie
-*/
 export const logoutUser = async () => {
-  return await API.post("/logout");
+  const res = await API.post("/logout");
+  return res.data;
 };
 
-/*
-======================================================
-GET CURRENT USER
-======================================================
-Reads session cookie
-Backend fetches MongoDB user
-Used for persistent login on refresh
-*/
 export const getCurrentUser = async () => {
-  return await API.get("/me");
+  const res = await API.get("/me");
+  return res.data;
 };
 
-/*
-======================================================
-UPDATE PROFILE
-======================================================
-Updates MongoDB user data
-Requires authenticated session
-*/
 export const updateProfile = async (data) => {
-  return await API.put("/update", data);
+  const res = await API.put("/update", data);
+  return res.data;
 };
 
-/*
-======================================================
-CHANGE PASSWORD
-======================================================
-Verifies old password then updates MongoDB record
-*/
 export const changePassword = async (data) => {
-  return await API.post("/change-password", data);
+  const res = await API.post("/change-password", data);
+  return res.data;
 };
 
-/*
-======================================================
-REQUEST PASSWORD RESET
-======================================================
-Backend sends reset email
-Stores reset token in MongoDB
-*/
 export const requestPasswordReset = async (data) => {
-  return await API.post("/reset-password", data);
+  const res = await API.post("/reset-password", data);
+  return res.data;
 };
 
-/*
-======================================================
-RESET PASSWORD CONFIRM
-======================================================
-Validates reset token
-Updates MongoDB password
-*/
 export const resetPassword = async (data) => {
-  return await API.post("/reset-password/confirm", data);
+  const res = await API.post("/reset-password/confirm", data);
+  return res.data;
+};
+
+export const verifyEmail = async (data) => {
+  const res = await API.post("/verify-email", data);
+  return res.data;
 };
 
 /*
-======================================================
-VERIFY EMAIL
-======================================================
-Validates verification token
-Updates MongoDB user status
+WHAT THIS FILE DOES
+✔ Centralizes all backend communication
+✔ Sends authentication cookies automatically
+✔ Returns clean API responses
+✔ Provides reusable auth functions
 */
-export const verifyEmail = async (data) => {
-  return await API.post("/verify-email", data);
-};

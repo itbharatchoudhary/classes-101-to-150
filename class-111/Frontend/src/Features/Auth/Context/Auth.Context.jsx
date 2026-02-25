@@ -35,16 +35,16 @@ export function AuthProvider({ children }) {
   Backend → reads cookie → finds MongoDB session
   Returns authenticated user
   */
-  const fetchUser = async () => {
-    try {
-      const res = await getCurrentUser();
-      setUser(res.data.user);
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+ const fetchUser = async () => {
+  try {
+    const res = await getCurrentUser();
+    setUser(res.user);
+  } catch {
+    setUser(null);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchUser();
@@ -57,11 +57,10 @@ export function AuthProvider({ children }) {
   Backend validates credentials using MongoDB
   Session cookie stored automatically
   */
-  const login = async (formData) => {
-    const res = await loginUser(formData);
-    setUser(res.data.user);
-  };
-
+ const login = async (formData) => {
+  const res = await loginUser(formData);
+  setUser(res.user); // FIXED
+};
   /*
   ======================================================
   REGISTER
@@ -69,10 +68,10 @@ export function AuthProvider({ children }) {
   Creates MongoDB user
   Backend logs user in automatically
   */
-  const register = async (formData) => {
-    const res = await registerUser(formData);
-    setUser(res.data.user);
-  };
+ const register = async (formData) => {
+  const res = await registerUser(formData);
+  setUser(res.user); // FIXED
+};
 
   /*
   ======================================================

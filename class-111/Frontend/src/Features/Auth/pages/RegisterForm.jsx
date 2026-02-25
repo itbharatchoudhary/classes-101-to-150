@@ -6,7 +6,8 @@ import { useNavigate, Link } from "react-router-dom";
 ======================================================
 REGISTER PAGE
 ======================================================
-Creates new user and logs them in
+Creates MongoDB user via backend
+Backend automatically logs user in via cookie
 */
 
 export default function RegisterForm() {
@@ -25,7 +26,8 @@ export default function RegisterForm() {
   ======================================================
   HANDLE REGISTER SUBMIT
   ======================================================
-  Calls auth register and redirects
+  Sends user data to backend
+  Backend creates MongoDB record and returns user
   */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,7 +35,7 @@ export default function RegisterForm() {
       await register(form);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(err.message || "Registration failed");
     }
   };
 
@@ -51,42 +53,37 @@ export default function RegisterForm() {
           <p className="text-red-500 text-sm text-center">{error}</p>
         )}
 
-        {/* Username */}
         <input
           type="text"
           placeholder="Username"
-          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-black outline-none"
+          className="w-full border border-gray-300 p-3 rounded-lg"
           onChange={(e) =>
             setForm({ ...form, username: e.target.value })
           }
         />
 
-        {/* Email */}
         <input
           type="email"
           placeholder="Email"
-          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-black outline-none"
+          className="w-full border border-gray-300 p-3 rounded-lg"
           onChange={(e) =>
             setForm({ ...form, email: e.target.value })
           }
         />
 
-        {/* Password */}
         <input
           type="password"
           placeholder="Password"
-          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-black outline-none"
+          className="w-full border border-gray-300 p-3 rounded-lg"
           onChange={(e) =>
             setForm({ ...form, password: e.target.value })
           }
         />
 
-        {/* Submit Button */}
-        <button className="w-full bg-black text-white py-3 rounded-lg hover:opacity-90 transition">
+        <button className="w-full bg-black text-white py-3 rounded-lg">
           Register
         </button>
 
-        {/* Navigate to Login */}
         <p className="text-center text-sm text-gray-600">
           Already have an account?{" "}
           <Link to="/login" className="font-semibold text-black">
@@ -97,3 +94,11 @@ export default function RegisterForm() {
     </div>
   );
 }
+
+/*
+WHAT THIS FILE DOES
+✔ Sends new user data to backend
+✔ Backend stores user in MongoDB
+✔ Backend returns authenticated session
+✔ Redirects to protected area
+*/

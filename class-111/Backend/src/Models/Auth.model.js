@@ -1,12 +1,11 @@
 // ======================================================
-// IMPORT DEPENDENCIES
+// 1. IMPORT DEPENDENCIES
 // ======================================================
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const crypto = require("crypto");
 
 // ======================================================
-// PROFILE SUBDOCUMENT
+// 2. PROFILE SUBDOCUMENT SCHEMA
 // ======================================================
 const ProfileSchema = new mongoose.Schema(
   {
@@ -16,177 +15,102 @@ const ProfileSchema = new mongoose.Schema(
       trim: true,
     },
   },
-  { _id: false }
+  { _id: false } // Disable separate _id for subdocument
 );
 
 // ======================================================
-// USER SCHEMA
+// 3. USER SCHEMA
 // ======================================================
 const UserSchema = new mongoose.Schema(
   {
-    // ================= BASIC USER INFO =================
     username: {
       type: String,
-      required: true,
+      required: [true, "Username is required"],
       unique: true,
       trim: true,
       minlength: 3,
       maxlength: 30,
     },
-
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is required"],
       unique: true,
       lowercase: true,
       trim: true,
-      match: /^\S+@\S+\.\S+$/,
+      match: [/^\S+@\S+\.\S+$/, "Please use a valid email address"],
     },
-
     password: {
       type: String,
-      required: true,
+      required: [true, "Password is required"],
       minlength: 6,
-      select: false, // Hidden by default from queries
+      select: false, // Hide password by default
     },
-
     bio: {
       type: String,
       default: "",
       maxlength: 500,
     },
-
     profile: {
       type: ProfileSchema,
       default: () => ({}),
     },
-
-    // ================= EMAIL VERIFICATION =================
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
+    followers: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      default: [],
     },
-
-    emailVerificationToken: String,
-    emailVerificationExpires: Date,
-
-    // ================= PASSWORD RESET =================
-    passwordResetToken: String,
-    passwordResetExpires: Date,
+    following: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      default: [],
+    },
   },
   {
-    timestamps: true, // Automatically adds createdAt & updatedAt
-    versionKey: false,
+    timestamps: true, // Adds createdAt and updatedAt
+    versionKey: false, // Removes __v field
   }
 );
 
 // ======================================================
-// PASSWORD HASHING BEFORE SAVE
+// 4. INDEXES
+// ======================================================
+// UserSchema.index({ email: 1 }, { unique: true });
+// UserSchema.index({ username: 1 }, { unique: true });
+
+// ======================================================
+// 5. PRE-SAVE HOOK: HASH PASSWORD
 // ======================================================
 UserSchema.pre("save", async function () {
+  // Only hash if password is modified
   if (!this.isModified("password")) return;
-  this.password = await bcrypt.hash(this.password, 10);
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
-/*
-This hook ensures:
-- Password is NEVER stored as plain text
-- Hashing only happens when password changes
-*/
-
-
 // ======================================================
-// PASSWORD COMPARISON METHOD
+// 6. INSTANCE METHOD: COMPARE PASSWORD
 // ======================================================
-UserSchema.methods.comparePassword = function (candidatePassword) {
+UserSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-/*
-Used during login & password change
-Safely compares raw password with hashed password
-*/
-
-
 // ======================================================
-// GENERATE PASSWORD RESET TOKEN
-// ======================================================
-UserSchema.methods.createPasswordResetToken = function () {
-  const token = crypto.randomBytes(32).toString("hex");
-
-  this.passwordResetToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
-
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-  return token;
-};
-
-/*
-Creates secure reset token:
-- Raw token → send via email
-- Hashed token → stored in DB
-- Prevents token theft misuse
-*/
-
-
-// ======================================================
-// GENERATE EMAIL VERIFICATION TOKEN
-// ======================================================
-UserSchema.methods.createEmailVerificationToken = function () {
-  const token = crypto.randomBytes(32).toString("hex");
-
-  this.emailVerificationToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
-
-  this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
-
-  return token;
-};
-
-/*
-Used when verifying user's email address
-Token expires after 24 hours
-*/
-
-
-// ======================================================
-// REMOVE SENSITIVE DATA FROM API RESPONSE
+// 7. INSTANCE METHOD: TO JSON
 // ======================================================
 UserSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-
-  delete obj.password;
-  delete obj.passwordResetToken;
-  delete obj.passwordResetExpires;
-  delete obj.emailVerificationToken;
-  delete obj.emailVerificationExpires;
-
-  return obj;
+  const user = this.toObject();
+  delete user.password; // Hide password in API responses
+  return user;
 };
 
-/*
-Ensures API NEVER exposes:
-- Password
-- Reset tokens
-- Verification tokens
-*/
-
-
 // ======================================================
-// EXPORT MODEL
+// 8. EXPORT MODEL
 // ======================================================
 module.exports = mongoose.model("User", UserSchema);
 
 /*
-FILE RESPONSIBILITY
-✔ Defines database schema
-✔ Secures password storage
-✔ Generates secure tokens
-✔ Protects sensitive fields
-✔ Production-ready structure
+Professional Notes:
+- Password hashing happens automatically in pre-save.
+- Avoid manual hashing in controllers.
+- toJSON hides sensitive fields.
+- Indexes enforce uniqueness.
 */

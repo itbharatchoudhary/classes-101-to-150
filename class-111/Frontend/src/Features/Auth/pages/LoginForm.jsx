@@ -6,9 +6,8 @@ import { useNavigate, Link } from "react-router-dom";
 ======================================================
 LOGIN PAGE
 ======================================================
-- Clean card UI
-- Error handling
-- Redirect after login
+Authenticates user using backend MongoDB + JWT cookie
+Sends identifier (email OR username) and password
 */
 
 export default function LoginForm() {
@@ -26,7 +25,8 @@ export default function LoginForm() {
   ======================================================
   HANDLE FORM SUBMIT
   ======================================================
-  Calls auth login and redirects
+  Sends credentials to backend
+  Backend verifies MongoDB user and sets JWT cookie
   */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +34,7 @@ export default function LoginForm() {
       await login(form);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(err.message || "Invalid credentials");
     }
   };
 
@@ -52,32 +52,30 @@ export default function LoginForm() {
           <p className="text-red-500 text-sm text-center">{error}</p>
         )}
 
-        {/* Identifier Input */}
+        {/* Identifier (email or username) */}
         <input
           type="text"
           placeholder="Email or Username"
-          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-black outline-none"
+          className="w-full border border-gray-300 p-3 rounded-lg"
           onChange={(e) =>
             setForm({ ...form, identifier: e.target.value })
           }
         />
 
-        {/* Password Input */}
+        {/* Password */}
         <input
           type="password"
           placeholder="Password"
-          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-black outline-none"
+          className="w-full border border-gray-300 p-3 rounded-lg"
           onChange={(e) =>
             setForm({ ...form, password: e.target.value })
           }
         />
 
-        {/* Submit Button */}
-        <button className="w-full bg-black text-white py-3 rounded-lg hover:opacity-90 transition">
+        <button className="w-full bg-black text-white py-3 rounded-lg">
           Login
         </button>
 
-        {/* Navigate to Register */}
         <p className="text-center text-sm text-gray-600">
           Don't have an account?{" "}
           <Link to="/register" className="font-semibold text-black">
@@ -88,3 +86,11 @@ export default function LoginForm() {
     </div>
   );
 }
+
+/*
+WHAT THIS FILE DOES
+✔ Collects login credentials
+✔ Sends identifier + password to backend
+✔ Backend validates MongoDB user
+✔ Redirects after successful authentication
+*/
