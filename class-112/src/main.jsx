@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import "./index.css"; // Tailwind import
+import "./index.css"; 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -12,7 +12,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 /*
 APPLICATION ENTRY POINT
 
-✔ Imports Tailwind CSS
-✔ Mounts React app
+
 ✔ Enables strict mode for safe rendering
 */
