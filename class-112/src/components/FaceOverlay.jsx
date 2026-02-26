@@ -9,17 +9,17 @@ export default function FaceOverlay({ videoRef, canvasRef, detections }) {
     if (!video || !canvas) return;
     if (!video.videoWidth || !video.videoHeight) return;
 
-    const displaySize = {
+    const size = {
       width: video.videoWidth,
       height: video.videoHeight,
     };
 
-    canvas.width = displaySize.width;
-    canvas.height = displaySize.height;
+    canvas.width = size.width;
+    canvas.height = size.height;
 
-    faceapi.matchDimensions(canvas, displaySize);
+    faceapi.matchDimensions(canvas, size);
 
-    const resized = faceapi.resizeResults(detections, displaySize);
+    const resized = faceapi.resizeResults(detections, size);
 
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -29,24 +29,14 @@ export default function FaceOverlay({ videoRef, canvasRef, detections }) {
     faceapi.draw.drawFaceExpressions(canvas, resized);
   }, [detections]);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-      }}
-    />
-  );
+  return <canvas ref={canvasRef} className="absolute top-0 left-0" />;
 }
 
 /*
-DRAWING LAYER
+CANVAS OVERLAY
 
-✔ Matches canvas to video resolution
-✔ Draws bounding box
-✔ Draws landmarks
-✔ Draws emotion labels
-✔ Prevents zero-dimension crash
+✔ Matches canvas to video size
+✔ Draws face box, landmarks, emotions
+✔ Clears previous frame before drawing
+✔ Positioned above video using absolute layout
 */

@@ -17,7 +17,7 @@ export default function useCamera(videoRef) {
         };
       });
     } catch (err) {
-      console.error("Camera access denied:", err);
+      console.error("Camera access error:", err);
     }
   };
 
@@ -25,10 +25,10 @@ export default function useCamera(videoRef) {
 }
 
 /*
-CAMERA HOOK
+CAMERA ACCESS HOOK
 
 ✔ Requests webcam permission
-✔ Streams video to element
-✔ Waits for metadata before use
-✔ Handles browser errors safely
+✔ Streams camera to video element
+✔ Waits until video metadata loads
+✔ Handles errors safely
 */

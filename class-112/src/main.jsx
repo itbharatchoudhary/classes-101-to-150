@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import "./index.css"; // Tailwind import
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -9,6 +10,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 );
 
 /*
-Entry point of the React application.
-Mounts the main App component into the root HTML element.
+APPLICATION ENTRY POINT
+
+✔ Imports Tailwind CSS
+✔ Mounts React app
+✔ Enables strict mode for safe rendering
 */

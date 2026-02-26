@@ -16,70 +16,81 @@ export default function App() {
   const { modelsLoaded } = useFaceApiModels();
 
   const [detections, setDetections] = useState([]);
+  const [trackingEnabled, setTrackingEnabled] = useState(true);
 
   useEffect(() => {
     if (!modelsLoaded) return;
 
     let animationId;
 
-    const runDetection = async () => {
+    const detect = async () => {
       const video = videoRef.current;
-      if (!video) {
-        animationId = requestAnimationFrame(runDetection);
+
+      if (!video || !trackingEnabled) {
+        animationId = requestAnimationFrame(detect);
         return;
       }
 
-      // Wait until video is ready
       if (!video.videoWidth || !video.videoHeight) {
-        animationId = requestAnimationFrame(runDetection);
+        animationId = requestAnimationFrame(detect);
         return;
       }
 
       try {
-        const results = await faceapi
+        const result = await faceapi
           .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-          .withFaceLandmarks()      // MUST COME FIRST
-          .withFaceExpressions();   // THEN EXPRESSIONS
+          .withFaceLandmarks()
+          .withFaceExpressions();
 
-        setDetections(results);
+        setDetections(result);
       } catch (err) {
-        console.error("Detection error:", err);
+        console.error(err);
       }
 
-      animationId = requestAnimationFrame(runDetection);
+      animationId = requestAnimationFrame(detect);
     };
 
     startCamera();
-    runDetection();
+    detect();
 
     return () => cancelAnimationFrame(animationId);
-  }, [modelsLoaded]);
+  }, [modelsLoaded, trackingEnabled]);
 
   return (
-    <div style={{ textAlign: "center", paddingTop: 20 }}>
-      <h2>Face Expression Tracker</h2>
+    <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center gap-6 p-6">
+      <h1 className="text-3xl font-bold">Face Expression Tracker</h1>
 
-      <div style={{ position: "relative", display: "inline-block" }}>
+      <button
+        onClick={() => setTrackingEnabled((prev) => !prev)}
+        className={`px-6 py-2.5 rounded-xl font-semibold text-white shadow-md transition-all duration-200 ease-out active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${trackingEnabled ? "bg-red-500 hover:bg-red-600 focus:ring-red-400 shadow-red-200" : "bg-emerald-500 hover:bg-emerald-600 focus:ring-emerald-400 shadow-emerald-200"}`}
+      >
+        {trackingEnabled ? "Stop Tracking" : "Start Tracking"}
+      </button>
+
+      <div className="relative">
         <CameraFeed videoRef={videoRef} />
-        <FaceOverlay
-          videoRef={videoRef}
-          canvasRef={canvasRef}
-          detections={detections}
-        />
+
+        {trackingEnabled && (
+          <FaceOverlay
+            videoRef={videoRef}
+            canvasRef={canvasRef}
+            detections={detections}
+          />
+        )}
       </div>
 
-      <EmotionPanel detections={detections} />
+      {trackingEnabled && <EmotionPanel detections={detections} />}
     </div>
   );
 }
 
 /*
-MAIN CONTROLLER
+MAIN APPLICATION CONTROLLER
 
-Responsibilities:
+✔ Loads AI models
 ✔ Starts webcam
-✔ Runs face detection loop using requestAnimationFrame
-✔ Ensures video dimensions exist before detection
-✔ Sends results to UI components
-✔ Uses professional non-blocking detection loop
+✔ Runs detection loop using requestAnimationFrame
+✔ Provides toggle control for emotion tracking
+✔ Passes detection data to UI components
+✔ Uses Tailwind for layout and styling
 */

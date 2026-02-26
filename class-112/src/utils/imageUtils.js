@@ -5,7 +5,8 @@ export function getDominantEmotion(expressions) {
 }
 
 /*
-Utility helper:
-Finds emotion with highest probability.
-Useful for analytics or alerts.
+UTILITY FUNCTION
+
+✔ Returns highest probability emotion
+✔ Reusable helper for analytics or alerts
 */

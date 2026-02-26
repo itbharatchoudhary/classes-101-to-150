@@ -25,9 +25,9 @@ export default function useFaceApiModels() {
 }
 
 /*
-MODEL LOADER
+MODEL LOADING HOOK
 
-✔ Loads neural networks once
-✔ Runs in parallel for performance
-✔ Blocks detection until ready
+✔ Loads neural networks from public/models
+✔ Runs once on app start
+✔ Enables detection only after models ready
 */

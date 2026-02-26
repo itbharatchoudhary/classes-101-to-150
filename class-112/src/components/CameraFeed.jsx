@@ -1,20 +1,21 @@
 export default function CameraFeed({ videoRef }) {
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        width="720"
-        height="560"
-        style={{ borderRadius: "10px" }}
-      />
-    </div>
+    <video
+      ref={videoRef}
+      autoPlay
+      muted
+      playsInline
+      width="720"
+      height="560"
+      className="rounded-2xl  shadow-lg border border-slate-700"
+    />
   );
 }
 
 /*
-Video container now positioned properly
-so overlay canvas aligns perfectly.
+VIDEO DISPLAY COMPONENT
+
+✔ Shows webcam stream
+✔ Styled with Tailwind
+✔ No business logic (pure UI component)
 */
