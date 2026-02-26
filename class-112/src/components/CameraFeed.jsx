@@ -16,6 +16,5 @@ export default function CameraFeed({ videoRef }) {
 VIDEO DISPLAY COMPONENT
 
 ✔ Shows webcam stream
-✔ Styled with Tailwind
 ✔ No business logic (pure UI component)
 */
