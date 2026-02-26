@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles without @apply (Tailwind v4 safe) */
+body {
+  background-color: #0f172a; /* same as bg-slate-900 */
+  color: white;
+  font-family: system-ui, sans-serif;
+}
