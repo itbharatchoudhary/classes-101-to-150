@@ -1,3 +1,4 @@
+const Blacklist = require("../Models/Blacklist.model");
 const jwt = require("jsonwebtoken");
 const User = require("../Models/User.model");
 
@@ -99,6 +100,30 @@ exports.getMe = async (req, res, next) => {
     res.json({
       success: true,
       user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* =========================
+   LOGOUT USER
+========================= */
+exports.logout = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.decode(token);
+
+    await Blacklist.create({
+      token,
+      expiresAt: new Date(decoded.exp * 1000),
+    });
+
+    res.json({
+      success: true,
+      message: "Logged out successfully",
     });
   } catch (error) {
     next(error);

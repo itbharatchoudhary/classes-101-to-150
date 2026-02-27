@@ -1,14 +1,13 @@
 const jwt = require("jsonwebtoken");
+const Blacklist = require("../Models/Blacklist.model");
 
 /* =========================
    PROTECT MIDDLEWARE
-   Verifies JWT and attaches user to request
 ========================= */
-exports.protect = (req, res, next) => {
+exports.protect = async (req, res, next) => {
   try {
     let token;
 
-    // Extract token from Authorization header
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
@@ -16,7 +15,6 @@ exports.protect = (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
     }
 
-    // If no token → unauthorized
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -24,10 +22,17 @@ exports.protect = (req, res, next) => {
       });
     }
 
-    // Verify token
+    // ❗ CHECK BLACKLIST
+    const blacklisted = await Blacklist.findOne({ token });
+    if (blacklisted) {
+      return res.status(401).json({
+        success: false,
+        message: "Token expired. Please login again.",
+      });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Attach user ID to request
     req.user = { id: decoded.id };
 
     next();

@@ -10,5 +10,6 @@ router.post("/login", AuthController.login);
 
 /* Private Routes */
 router.get("/me", protect, AuthController.getMe);
+router.post("/logout", protect, AuthController.logout);
 
 module.exports = router;
