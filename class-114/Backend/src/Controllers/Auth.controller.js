@@ -1,9 +1,10 @@
-const Blacklist = require("../Models/Blacklist.model");
 const jwt = require("jsonwebtoken");
 const User = require("../Models/User.model");
+const Blacklist = require("../Models/Blacklist.model");
 
 /* =========================
    Generate JWT Token
+   Creates signed token with expiration
 ========================= */
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -13,6 +14,8 @@ const generateToken = (userId) => {
 
 /* =========================
    REGISTER USER
+   Creates new account
+   Returns JWT token
 ========================= */
 exports.register = async (req, res, next) => {
   try {
@@ -27,7 +30,6 @@ exports.register = async (req, res, next) => {
     }
 
     const user = await User.create({ name, email, password });
-
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -48,6 +50,8 @@ exports.register = async (req, res, next) => {
 
 /* =========================
    LOGIN USER
+   Verifies credentials
+   Updates last login time
 ========================= */
 exports.login = async (req, res, next) => {
   try {
@@ -91,29 +95,35 @@ exports.login = async (req, res, next) => {
 };
 
 /* =========================
-   GET CURRENT USER
-========================= */
-exports.getMe = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user.id);
-
-    res.json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/* =========================
    LOGOUT USER
+   Blacklists current JWT
+   Prevents further use
 ========================= */
 exports.logout = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader.split(" ")[1];
+    let token;
 
+    /* =========================
+       Extract token from header
+    ========================= */
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Token required",
+      });
+    }
+
+    /* =========================
+       Decode token to get expiry time
+       Token remains blacklisted until expiration
+    ========================= */
     const decoded = jwt.decode(token);
 
     await Blacklist.create({
@@ -124,6 +134,23 @@ exports.logout = async (req, res, next) => {
     res.json({
       success: true,
       message: "Logged out successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* =========================
+   GET CURRENT USER
+   Returns authenticated user data
+========================= */
+exports.getMe = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    res.json({
+      success: true,
+      user,
     });
   } catch (error) {
     next(error);
