@@ -1,22 +1,27 @@
 const jwt = require("jsonwebtoken");
 const User = require("../Models/User.model");
-const Blacklist = require("../Models/Blacklist.model");
+const { setCache, getCache } = require("../Config/Cache");
 
-/* =========================
-   Generate JWT Token
-   Creates signed token with expiration
-========================= */
+/**
+ * =========================================================
+ * Generate JWT Token
+ * Creates signed token with expiration
+ * =========================================================
+ */
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
 };
 
-/* =========================
-   REGISTER USER
-   Creates new account
-   Returns JWT token
-========================= */
+
+/**
+ * =========================================================
+ * REGISTER USER
+ * Creates new account
+ * Returns JWT token
+ * =========================================================
+ */
 exports.register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -48,11 +53,14 @@ exports.register = async (req, res, next) => {
   }
 };
 
-/* =========================
-   LOGIN USER
-   Verifies credentials
-   Updates last login time
-========================= */
+
+/**
+ * =========================================================
+ * LOGIN USER
+ * Verifies credentials
+ * Updates last login time
+ * =========================================================
+ */
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -94,18 +102,21 @@ exports.login = async (req, res, next) => {
   }
 };
 
-/* =========================
-   LOGOUT USER
-   Blacklists current JWT
-   Prevents further use
-========================= */
+
+/**
+ * =========================================================
+ * LOGOUT USER
+ * Stores token in Redis blacklist
+ * Token automatically expires based on JWT expiry
+ * =========================================================
+ */
 exports.logout = async (req, res, next) => {
   try {
     let token;
 
-    /* =========================
-       Extract token from header
-    ========================= */
+    /**
+     * Extract token from Authorization header
+     */
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
@@ -120,16 +131,18 @@ exports.logout = async (req, res, next) => {
       });
     }
 
-    /* =========================
-       Decode token to get expiry time
-       Token remains blacklisted until expiration
-    ========================= */
+    /**
+     * Decode token to calculate remaining lifetime
+     * TTL ensures Redis auto-removes expired tokens
+     */
     const decoded = jwt.decode(token);
+    const expiresInSeconds = decoded.exp - Math.floor(Date.now() / 1000);
 
-    await Blacklist.create({
-      token,
-      expiresAt: new Date(decoded.exp * 1000),
-    });
+    /**
+     * Store token in Redis blacklist
+     * Key format: blacklist:<token>
+     */
+    await setCache(`blacklist:${token}`, "true", expiresInSeconds);
 
     res.json({
       success: true,
@@ -140,10 +153,13 @@ exports.logout = async (req, res, next) => {
   }
 };
 
-/* =========================
-   GET CURRENT USER
-   Returns authenticated user data
-========================= */
+
+/**
+ * =========================================================
+ * GET CURRENT USER
+ * Returns authenticated user data
+ * =========================================================
+ */
 exports.getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
