@@ -2,21 +2,35 @@ import React, { useState } from 'react'
 import "../Style/Register.scss"
 import FormGroup from '../Components/FormGroup'
 import { Link } from 'react-router';
+import {useAuth} from '../Hooks/useAuth'
+import { useNavigate } from 'react-router';
+
 
 const Register = () => {
-    const [name, setName] = useState('')
+    const [username, setUsername] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    
+
+    const navigate = useNavigate()
+
+    const { loading, handleRegister } = useAuth()
+
+    async function handleSubmit(e) {
+        e.preventDefault()
+
+        await handleRegister({ username, email, password })
+        navigate('/')
+    }
+
 
     return (
         <main className='register-page'>
             <div className="form-container">
                 <h1>Register</h1>
-                <form>
+                <form onSubmit={handleSubmit}>
                     <FormGroup
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                         label="Name"
                         placeholder="Enter your name" />
                     <FormGroup
