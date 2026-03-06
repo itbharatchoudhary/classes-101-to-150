@@ -1,0 +1,103 @@
+.emotion-panel {
+  background: #0f172a;
+  // padding: 20px;
+  border-radius: 18px;
+  max-width: 420px;
+  margin: 20px 0px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  color: white;
+  font-family: sans-serif;
+}
+
+.no-face {
+  text-align: center;
+  color: #94a3b8;
+  margin-top: 20px;
+  font-style: italic;
+}
+
+.emotion-title {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.emotion-dominant {
+  margin-left: 0px;
+  color: #22d3ee;
+  text-transform: capitalize;
+}
+
+.emotion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.emotion-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #cbd5f5;
+}
+
+.emotion-name {
+  text-transform: capitalize;
+}
+
+.emotion-value {
+  font-family: monospace;
+}
+
+.emotion-bar-bg {
+  width: 100%;
+  background: #334155;
+  height: 14px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.emotion-bar {
+  height: 14px;
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+/* Emotion Colors */
+
+.happy {
+  background: #facc15;
+}
+
+.sad {
+  background: #60a5fa;
+}
+
+.angry {
+  background: #ef4444;
+}
+
+.surprised {
+  background: #c084fc;
+}
+
+.neutral {
+  background: #94a3b8;
+}
+
+.disgusted {
+  background: #22c55e;
+}
+
+.fearful {
+  background: #ec4899;
+}
+
+.emotion-footer {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #94a3b8;
+  font-style: italic;
+}

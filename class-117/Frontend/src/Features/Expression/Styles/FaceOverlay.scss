@@ -1,0 +1,25 @@
+.face-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  pointer-events: none;
+
+  z-index: 2;
+}
+
+/* Optional container styling if needed */
+.face-overlay-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Video styling for proper alignment */
+.face-video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
