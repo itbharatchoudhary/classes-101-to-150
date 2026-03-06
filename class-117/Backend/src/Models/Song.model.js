@@ -7,14 +7,22 @@ const songSchema = new mongoose.Schema({
     },
     posterUrl: {
         type: String,
-        required: true,
+        required: false,
     },
     title: {
         type: String,
         required: true,
+    },
+    mood: {
+        type: String,
+        enum: {
+            values: ["sad", "happy", "surprised"],
+            message: "Enum this is "
+        },
+        required: true,
     }
 })
 
-const songModel = mongoose.model("songs",songSchema)
+const songModel = mongoose.model("songs", songSchema)
 
 module.exports = songModel
