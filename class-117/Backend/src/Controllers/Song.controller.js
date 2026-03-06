@@ -11,21 +11,25 @@ async function uploadSong(req, res) {
 
     const tags = id3.read(songBuffer);
 
-    const songFile = await storageService.uploadToImageKit({
-        buffer: songBuffer,
-        fileName: tags.title || "song",
-        folder: "/cohort-2/modify/songs"
-    })
-
-    let posterFile = null;
+    const uploads = [
+        storageService.uploadToImageKit({
+            buffer: songBuffer,
+            fileName: tags.title || "song",
+            folder: "/cohort-2/modify/songs"
+        })
+    ];
 
     if (tags.image && tags.image.imageBuffer) {
-        posterFile = await storageService.uploadToImageKit({
-            buffer: tags.image.imageBuffer,
-            fileName: (tags.title || "poster") + ".jpeg",
-            folder: "/cohort-2/modify/posters"
-        })
+        uploads.push(
+            storageService.uploadToImageKit({
+                buffer: tags.image.imageBuffer,
+                fileName: (tags.title || "poster") + ".jpeg",
+                folder: "/cohort-2/modify/posters"
+            })
+        );
     }
+
+    const [songFile, posterFile] = await Promise.all(uploads);
 
     const song = await songModel.create({
         title: tags.title,
@@ -46,5 +50,16 @@ async function uploadSong(req, res) {
 
 }
 
-module.exports = { uploadSong };
+async function getAllSongs(req, res) {
+    const { mood } = req.query;
+
+    const song = await songModel.findOne({ mood })
+    res.json({
+        success: true,        
+        message: "Songs fetched successfully",
+        song
+    })
+}
+
+module.exports = { uploadSong, getAllSongs };
 
