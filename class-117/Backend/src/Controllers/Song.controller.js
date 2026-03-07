@@ -35,7 +35,10 @@ async function uploadSong(req, res) {
             );
         }
 
-        const [songFile, posterFile] = await Promise.all(uploads);
+        const results = await Promise.all(uploads);
+
+        const songFile = results[0];
+        const posterFile = results[1];
 
         const song = await songModel.create({
             title: tags.title,

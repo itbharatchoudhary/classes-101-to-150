@@ -148,12 +148,19 @@ exports.logout = async (req, res, next) => {
     }
 
     /**
-     * Decode token to calculate remaining lifetime
-     * TTL ensures Redis auto-removes expired tokens
+     * Decode token to get expiration time
+     * Note: jwt.decode does not verify the token, it only decodes the payload
      */
     const decoded = jwt.decode(token);
-    const expiresInSeconds = decoded.exp - Math.floor(Date.now() / 1000);
 
+    if (!decoded || !decoded.exp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid token"
+      });
+    }
+
+    const expiresInSeconds = decoded.exp - Math.floor(Date.now() / 1000);
     /**
      * Store token in Redis blacklist
      * Key format: blacklist:<token>
