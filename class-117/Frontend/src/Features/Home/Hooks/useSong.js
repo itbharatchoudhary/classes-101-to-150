@@ -2,7 +2,7 @@ import { getSong } from "../Services/Song.api";
 import { useContext } from "react";
 import { songContext } from "../Context/Song.context";
 
-export const useSong = ({ children }) => {
+const useSong = () => {
     const context = useContext(songContext);
 
     const { song, setSong, loading, setLoading } = context;
@@ -22,3 +22,5 @@ export const useSong = ({ children }) => {
 
     return { song, loading, handleGetSong };
 }
+
+export default useSong;

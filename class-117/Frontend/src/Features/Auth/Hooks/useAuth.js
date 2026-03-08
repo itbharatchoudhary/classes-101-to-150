@@ -39,6 +39,7 @@ export const useAuth = () => {
             const data = await getMe()
             setUser(data.user)
         } catch (error) {
+            setUser(null)
             console.error('GetMe error:', error)
         } finally {
             setLoading(false)
@@ -52,17 +53,23 @@ export const useAuth = () => {
             setUser(null)
         } catch (error) {
             console.error('Logout error:', error)
-        } finally {
+        }
+        finally {
             setLoading(false)
         }
     }
 
     useEffect(() => {
-    const token = document.cookie.includes("token")
-    if (token) {
-        handleGetMe()
-    }
-}, [])  
+        async function initAuth() {
+            try {
+                await handleGetMe()
+            } catch (error) {
+                setUser(null)
+            }
+        }
+
+        initAuth()
+    }, [])
 
 
 
