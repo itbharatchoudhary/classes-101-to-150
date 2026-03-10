@@ -16,4 +16,14 @@ httpServer.listen(3000, () => {
 });
 
 why we use this httpServer ? 
+what is mean 
+io : Server , 
+on: event ko listen,
+emit: event ko fire krna,
+socket : single user
+
+what is ->
+socket.emit()
+socket.broadcast().emit()
+io.emit()
 

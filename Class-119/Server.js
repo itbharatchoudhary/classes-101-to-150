@@ -6,6 +6,12 @@ const httpServer = createServer();
 const io = new Server(httpServer, { /* options */ });
 
 io.on("connection", (socket) => {
+    console.log("new connection create")
+    socket.on("message", (msg) => {
+        console.log("user fired message");
+        console.log(msg);
+        io.emit("abc")
+    })
 
 });
 
