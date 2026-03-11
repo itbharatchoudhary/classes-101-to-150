@@ -1,4 +1,5 @@
 import express from "express";
+import AuthRoutes from "./Routes/Auth.Routes"
 
 const app = express();
 
