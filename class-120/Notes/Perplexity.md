@@ -57,3 +57,8 @@
 | content   | String   | Message content                       |
 | role      | Enum     | Role of sender: `user` or `AI`        |
 | createdAt | Date     | Message creation timestamp            |
+
+start the Project setUp process
+
+npm init -y 
+npm i express mongoose jsonwebtoken dotenv cookie-parser
