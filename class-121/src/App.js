@@ -1,20 +1,25 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 import authRoutes from "./Routes/Auth.Routes.js";
 
 const app = express();
 
-// Middleware
+// Body Parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Cookie Parser
+app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRoutes);
 
-// Error handling middleware (IMPORTANT!)
+// Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(err.status || 500).json({ 
-    message: err.message || "Server error" 
+
+  res.status(err.status || 500).json({
+    message: err.message || "Server error"
   });
 });
 

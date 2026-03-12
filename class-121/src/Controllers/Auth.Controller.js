@@ -1,23 +1,44 @@
-// src/Controllers/Auth.Controller.js
 import UserModel from "../models/User.Model.js";
 import jwt from "jsonwebtoken";
 import { sendMail } from "../Services/Mail.Service.js";
 
+
+// 🔹 Generate JWT Token
+const generateToken = (userId) => {
+  return jwt.sign(
+    { id: userId },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+};
+
+
+
 // 🔹 Register User
 export const registerUser = async (req, res, next) => {
   try {
+
     const { username, email, password } = req.body;
 
-    // Check if user exists
+    // Check existing user
     const existingUser = await UserModel.findOne({ email });
-    if (existingUser)
-      return res.status(400).json({ message: "Email already registered" });
 
-    // Create new user
-    const user = new UserModel({ username, email, password });
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Email already registered"
+      });
+    }
+
+    // Create user
+    const user = new UserModel({
+      username,
+      email,
+      password
+    });
+
     await user.save();
 
-    // Create JWT Token for verification
+    // Email verification token
     const verificationToken = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
@@ -25,65 +46,179 @@ export const registerUser = async (req, res, next) => {
     );
 
     // Verification link
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+    const verificationLink =
+      `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
-    // Email content
-    const subject = "Welcome to My App! Verify Your Email";
-    const text = `Hi ${username},\n\nThank you for registering at My App.\nPlease verify your email by clicking the link below:\n\n${verificationLink}\n\nIf you did not register, please ignore this email.\n\nBest regards,\nMy App Team`;
+    const subject = "Verify your email";
+
+    const text = `
+Hello ${username},
+
+Please verify your email by clicking the link below:
+
+${verificationLink}
+`;
 
     const html = `
-      <div style="font-family: Arial, sans-serif; line-height:1.5; color: #333;">
-        <h2>Welcome, ${username}!</h2>
-        <p>Thank you for registering at <strong>My App</strong>.</p>
-        <p>Please verify your email by clicking the button below:</p>
-        <a href="${verificationLink}" style="display:inline-block; padding:10px 20px; background:#4CAF50; color:white; text-decoration:none; border-radius:5px;">Verify Email</a>
-        <p>If you did not register, you can safely ignore this email.</p>
-        <p>Best regards,<br/>The My App Team</p>
+      <div style="font-family:Arial">
+        <h2>Hello ${username}</h2>
+        <p>Please verify your email</p>
+
+        <a href="${verificationLink}"
+        style="padding:10px 20px;
+        background:#4CAF50;
+        color:white;
+        text-decoration:none;
+        border-radius:5px">
+        Verify Email
+        </a>
       </div>
     `;
 
-    // Send verification email
+    // Send mail
     await sendMail(email, subject, text, html);
 
-    // Response
     res.status(201).json({
       message: "User registered successfully. Verification email sent!",
-      user: { id: user._id, username: user.username, email: user.email },
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
     });
 
   } catch (error) {
-    next(error); // Express error middleware handle karega
+    next(error);
   }
 };
+
+
 
 // 🔹 Login User
 export const loginUser = async (req, res, next) => {
   try {
+
     const { email, password } = req.body;
 
     const user = await UserModel.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Email verification check
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    // Check email verification
     if (!user.verified) {
-      return res.status(400).json({ message: "Please verify your email before login." });
+      return res.status(400).json({
+        message: "Please verify your email first"
+      });
     }
 
     // Compare password
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    // Create JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Invalid credentials"
+      });
+    }
 
-    // Response
+    // Generate token
+    const token = generateToken(user._id);
+
+    // Set cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, // true in production (HTTPS)
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
     res.status(200).json({
       message: "Login successful",
-      user: { id: user._id, username: user.username, email: user.email },
       token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
     });
 
   } catch (error) {
-    next(error); // Express error middleware handle karega
+    next(error);
+  }
+};
+
+
+
+// 🔹 Get Profile
+export const getUserProfile = async (req, res, next) => {
+  try {
+
+    const user = await UserModel
+      .findById(req.user.id)
+      .select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({
+      message: "Profile fetched successfully",
+      user
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+// 🔹 Verify Email
+export const verifyEmail = async (req, res, next) => {
+  try {
+
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({
+        message: "Token is required"
+      });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    const user = await UserModel.findById(decoded.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    if (user.verified) {
+      return res.status(400).json({
+        message: "Email already verified"
+      });
+    }
+
+    user.verified = true;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Email verified successfully"
+    });
+
+  } catch (error) {
+    next(error);
   }
 };
