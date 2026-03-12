@@ -159,3 +159,30 @@ Ab user:
 * protected features use kar sakta hai
 
 ---
+
+# How perplexity clone working
+user--->---server---->---gemini-->--server--->---user
+
+## with the hepl of ### **Chat-model**
+
+| Field     | Type     | Description                               |
+| --------- | -------- | ----------------------------------------- |
+| _id       | ObjectId | Unique identifier for the chat            |
+| user      | ObjectId | Reference to the `User` who owns the chat |
+| title     | String   | Title of the chat session                 |
+| createdAt | Date     | Chat creation timestamp                   |
+| updatedAt | Date     | Last update timestamp                     |
+
+### **Message-model**
+
+| Field     | Type     | Description                           |
+| --------- | -------- | ------------------------------------- |
+| _id       | ObjectId | Unique identifier for the message     |
+| chat      | ObjectId | Reference to the `Chat` it belongs to |
+| content   | String   | Message content                       |
+| role      | Enum     | Role of sender: `user` or `AI`        |
+| createdAt | Date     | Message creation timestamp            |
+
+
+
+[Docs-for-google-gemini](https://docs.langchain.com/oss/javascript/langchain/models)
