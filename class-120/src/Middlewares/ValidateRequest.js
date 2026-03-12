@@ -1,11 +1,6 @@
-// src/Middlewares/validateRequest.js
 import { validationResult } from "express-validator";
 
-/**
- * Middleware to validate requests using express-validator
- * If validation errors exist, responds with 400 and error details
- * Otherwise, calls next() to continue to the controller
- */
+
 const validateRequest = (req, res, next) => {
   const errors = validationResult(req);
 
@@ -16,8 +11,6 @@ const validateRequest = (req, res, next) => {
       errors: errors.array()
     });
   }
-
-  // No errors → proceed to next middleware/controller
   next();
 };
 

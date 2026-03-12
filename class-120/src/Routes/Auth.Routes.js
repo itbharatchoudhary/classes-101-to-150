@@ -1,9 +1,8 @@
 // src/Routes/Auth.Routes.js
 import express from "express";
 import { registerUser, loginUser } from "../Controllers/Auth.Controller.js";
-import { registerValidator, loginValidator } from "../Validators/Auth.Validators.js"; // fixed typo
-import validateRequest from "../Middlewares/validateRequest.js"; // fixed casing
-
+import { registerValidator, loginValidator } from "../Validators/Auth.Validators.js"; 
+import validateRequest from "../Middlewares/ValidateRequest.js";
 const router = express.Router();
 
 // Register Route

@@ -1,9 +1,10 @@
+// src/Controllers/Auth.Controller.js
 import UserModel from "../models/User.Model.js";
 import jwt from "jsonwebtoken";
-import { sendMail } from "../Services/Mail.Service.js";  
+import { sendMail } from "../Services/Mail.Service.js";
 
-// Registration
-export const registerUser = async (req, res) => {
+// 🔹 Register User
+export const registerUser = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
 
@@ -20,16 +21,16 @@ export const registerUser = async (req, res) => {
     const verificationToken = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" } // token valid for 1 day
+      { expiresIn: "1d" }
     );
 
-    // Create verification link (frontend URL can vary)
+    // Verification link
     const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
-    // Professional Email Content
+    // Email content
     const subject = "Welcome to My App! Verify Your Email";
     const text = `Hi ${username},\n\nThank you for registering at My App.\nPlease verify your email by clicking the link below:\n\n${verificationLink}\n\nIf you did not register, please ignore this email.\n\nBest regards,\nMy App Team`;
-    
+
     const html = `
       <div style="font-family: Arial, sans-serif; line-height:1.5; color: #333;">
         <h2>Welcome, ${username}!</h2>
@@ -41,27 +42,29 @@ export const registerUser = async (req, res) => {
       </div>
     `;
 
-    // Send email
+    // Send verification email
     await sendMail(email, subject, text, html);
 
+    // Response
     res.status(201).json({
       message: "User registered successfully. Verification email sent!",
       user: { id: user._id, username: user.username, email: user.email },
     });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error); // Express error middleware handle karega
   }
 };
 
-// Login
-export const loginUser = async (req, res) => {
+// 🔹 Login User
+export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     const user = await UserModel.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Check if email is verified
+    // Email verification check
     if (!user.verified) {
       return res.status(400).json({ message: "Please verify your email before login." });
     }
@@ -73,6 +76,7 @@ export const loginUser = async (req, res) => {
     // Create JWT
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
+    // Response
     res.status(200).json({
       message: "Login successful",
       user: { id: user._id, username: user.username, email: user.email },
@@ -80,6 +84,6 @@ export const loginUser = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error); // Express error middleware handle karega
   }
 };

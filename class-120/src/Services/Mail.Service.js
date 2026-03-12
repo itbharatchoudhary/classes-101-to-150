@@ -1,13 +1,14 @@
+// src/Services/Mail.Service.js
 import nodemailer from "nodemailer";
 import { google } from "googleapis";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-// Google OAuth2 setup
+// 🔹 Google OAuth2 setup
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REDIRECT_URI = "https://developers.google.com/oauthplayground"; // standard
+const REDIRECT_URI = "https://developers.google.com/oauthplayground";
 const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
 
 const oAuth2Client = new google.auth.OAuth2(
@@ -18,10 +19,13 @@ const oAuth2Client = new google.auth.OAuth2(
 
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
-// Create transporter
+// 🔹 Create transporter
 export const createTransporter = async () => {
   try {
-    const accessToken = await oAuth2Client.getAccessToken();
+    const accessTokenObj = await oAuth2Client.getAccessToken();
+    const accessToken = accessTokenObj?.token;
+
+    if (!accessToken) throw new Error("Failed to generate Gmail access token");
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -31,21 +35,22 @@ export const createTransporter = async () => {
         clientId: CLIENT_ID,
         clientSecret: CLIENT_SECRET,
         refreshToken: REFRESH_TOKEN,
-        accessToken: accessToken.token,
+        accessToken,
       },
     });
 
     // Verify transporter
     await transporter.verify();
-    console.log("Mail transporter verified successfully");
+    console.log("✅ Mail transporter verified successfully");
 
     return transporter;
   } catch (error) {
-    console.error("Failed to create transporter:", error);
+    console.error("❌ Failed to create transporter:", error);
+    throw error;
   }
 };
 
-// Example function to send email
+// 🔹 Send Email function
 export const sendMail = async (to, subject, text, html = "") => {
   try {
     const transporter = await createTransporter();
@@ -58,10 +63,10 @@ export const sendMail = async (to, subject, text, html = "") => {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", result.response);
+    console.log("📧 Email sent:", result.response);
     return result;
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("❌ Error sending email:", error);
     throw error;
   }
 };

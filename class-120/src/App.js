@@ -1,14 +1,21 @@
 import express from "express";
-import AuthRoutes from './Routes/Auth.Routes.js';
+import authRoutes from "./Routes/Auth.Routes.js";
+
 const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Basic route
-app.get("/", (req, res) => {
-  res.send("Server is running!");
+// Routes
+app.use("/api/auth", authRoutes);
+
+// Error handling middleware (IMPORTANT!)
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ 
+    message: err.message || "Server error" 
+  });
 });
 
-app.use("/api/auth",AuthRoutes)
 export default app;
