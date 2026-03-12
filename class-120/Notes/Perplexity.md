@@ -153,20 +153,536 @@ User
 7. **Send token** → JSON response or email link.
 8. **User receives token** → can use to verify email or login.
 
-create flie
-C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-120\src\Controllers\Auth.Controller.js
-
 
 npm install express-validator
-create files -> 
-C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-120\src\Middlewares\ValidateRequest.js
-C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-120\src\Validators\Auth.Validaators.js
+
+## Server-types
+
+### 1️ Web Server 
+
+**Web Server** wo server hota hai jo **client (browser / app)** se request receive karta hai aur response send karta hai.
+
+Example:
+
+* User register karta hai
+* Request server ko jaati hai
+* Server database me data save karta hai
+* Response user ko bhejta hai
+
+#### Common Web Servers
+
+* Node.js
+* Express.js
+* Apache HTTP Server
+* Nginx
+
+#### Flow
+
+```
+User (Browser / App)
+        |
+        v
+Web Server (Node.js / Express)
+        |
+        v
+Database (MongoDB)
+```
+
+**Example use in your project**
+
+* Register user
+* Login user
+* Create chat
+* Save message
+
+Ye sab **Web Server handle karta hai**.
+
+---
+
+### 2️ SMTP Server 
+
+**SMTP Server** ka full form hai **Simple Mail Transfer Protocol**.
+
+Ye server **email send karne ke liye use hota hai**.
+
+Jab tum Node.js se email send karte ho using Nodemailer, tab ye **SMTP server se connect karta hai**.
+
+#### Example SMTP Servers
+
+* Gmail SMTP
+* Outlook SMTP
+* SendGrid
+* Amazon Simple Email Service
+
+#### Flow
+
+```
+Web Server
+   |
+   v
+Mail Transporter (Nodemailer)
+   |
+   v
+SMTP Server
+   |
+   v
+User Email Inbox
+```
 
 
-server types
+##  Email Sending Flow Diagram
 
-1. WEB server
-2. SMTP server
+```
+WEB SERVER (Node.js / Express)
+        |
+        | 1️ Request to send email
+        v
+MAIL TRANSPORTER (Nodemailer)
+        |
+        | 2️ Authenticate with OAuth2 / SMTP
+        v
+SMTP SERVER (Gmail SMTP)
+        |
+        | 3️ Process & deliver message
+        v
+USER EMAIL ADDRESS (Inbox)
+```
 
-WEB-server-->--transporter ->--SMTP-server-->---Email-Address
- 
+---
+
+###  Step-by-Step Explanation
+
+### 1️ Web Server
+
+Yeh aapka **Node.js / Express server** hota hai.
+
+Example:
+
+* User register karta hai
+* Server decide karta hai **verification email send karna hai**
+
+```js
+await sendMail(email, subject, text, html);
+```
+
+---
+
+### 2️ Mail Transporter
+
+Yeh **Nodemailer transporter** hota hai jo email send karne ka kaam karta hai.
+
+Isme hota hai:
+
+* SMTP configuration
+* OAuth authentication
+* Email formatting
+
+Example:
+
+```js
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    type: "OAuth2",
+    user: process.env.GOOGLE_USER
+  }
+});
+```
+
+Transporter basically **post office clerk** ki tarah kaam karta hai 📮.
+
+---
+
+### 3️ SMTP Server
+
+SMTP ka full form hai **Simple Mail Transfer Protocol**.
+
+Example SMTP servers:
+
+* Gmail SMTP
+* Outlook SMTP
+* SendGrid
+* Amazon SES
+
+SMTP server ka kaam:
+
+* Email accept karna
+* Security check karna
+* Correct mail server tak forward karna
+
+---
+
+### 4 Email Address (Recipient Inbox)
+
+Finally email deliver ho jata hai user ke inbox me.
+
+Example:
+
+```
+To: user@gmail.com
+Subject: Verify your email
+```
+
+User ko milta hai:
+
+```
+Welcome to My App
+Click here to verify your email
+```
+
+
+
+# 📁  Folder Structure Diagram
+
+```
+->
+│
+├── Server.js
+│
+└── src/
+    │
+    ├── App.js
+    │
+    ├── Config/
+    │     └── Database.js
+    │
+    ├── Controllers/
+    │     └── Auth.Controller.js
+    │
+    ├── Middlewares/
+    │     └── ValidateRequest.js
+    │
+    ├── Models/
+    │     └── User.Model.js
+    │
+    ├── Routes/
+    │     └── Auth.Routes.js
+    │
+    ├── Services/
+    │     └── Mail.Service.js
+    │
+    └── Validators/
+          └── Auth.Validators.js
+```
+
+---
+
+# ⚙️  System Flow Diagram
+
+```
+User (Frontend / Postman)
+        │
+        │ HTTP Request
+        ▼
+Server.js
+        │
+        ▼
+App.js
+        │
+        ▼
+Routes (Auth.Routes.js)
+        │
+        ▼
+Validators (Auth.Validators.js)
+        │
+        ▼
+Middleware (ValidateRequest.js)
+        │
+        ▼
+Controller (Auth.Controller.js)
+        │
+        ├────────► Model (User.Model.js)
+        │              │
+        │              ▼
+        │          Database (MongoDB)
+        │
+        └────────► Service (Mail.Service.js)
+                       │
+                       ▼
+                  SMTP Server
+                       │
+                       ▼
+                  User Email Inbox
+```
+
+---
+
+# 🔹 File by File Explanation
+
+## 1️ Server.js (Application Entry Point)
+
+Ye **main starting file** hoti hai.
+
+Kaam:
+
+* Server start karna
+* Database connect karna
+* App run karna
+
+Example flow
+
+```
+Start Server
+   │
+   ▼
+Connect Database
+   │
+   ▼
+Run Express App
+```
+
+---
+
+# 2️ App.js (Express Application Setup)
+
+Yaha **Express configuration hoti hai**
+
+Kaam:
+
+* Middleware setup
+* JSON parsing
+* Routes connect karna
+
+Example
+
+```
+Express App
+   │
+   ├── JSON Middleware
+   │
+   └── Auth Routes
+```
+
+---
+
+# 3️ Database.js (MongoDB Connection)
+
+Ye file **MongoDB connection handle karti hai**.
+
+Kaam:
+
+* MongoDB connect
+* Connection error handle
+
+Flow
+
+```
+Node Server
+     │
+     ▼
+MongoDB Driver
+     │
+     ▼
+MongoDB Database
+```
+
+---
+
+# 4️ Auth.Routes.js (API Routes)
+
+Yaha **API endpoints define hote hain**
+
+Example routes
+
+```
+POST /register
+POST /login
+```
+
+Flow
+
+```
+Request
+   │
+   ▼
+Route
+   │
+   ▼
+Controller
+```
+
+---
+
+# 5️ Auth.Validators.js (Input Validation)
+
+Ye file **user input validate karti hai**
+
+Example checks:
+
+```
+email valid hai?
+password length correct hai?
+username empty toh nahi?
+```
+
+Example
+
+```
+User Input
+   │
+   ▼
+Validator Check
+```
+
+---
+
+# 6️ ValidateRequest.js (Middleware)
+
+Ye middleware **validation errors handle karta hai**
+
+Flow
+
+```
+Validator
+   │
+   ▼
+ValidateRequest Middleware
+   │
+   ├── Error → Send response
+   │
+   └── Valid → Next()
+```
+
+---
+
+# 7️ Auth.Controller.js (Business Logic)
+
+Ye file **main backend logic handle karti hai**
+
+Example:
+
+### Register Flow
+
+```
+User Register
+     │
+     ▼
+Check Existing User
+     │
+     ▼
+Create User
+     │
+     ▼
+Hash Password
+     │
+     ▼
+Save to Database
+     │
+     ▼
+Send Verification Email
+```
+
+---
+
+### Login Flow
+
+```
+Login Request
+     │
+     ▼
+Find User
+     │
+     ▼
+Compare Password
+     │
+     ▼
+Generate JWT Token
+     │
+     ▼
+Send Response
+```
+
+Token generation library:
+jsonwebtoken
+
+---
+
+# 8️ User.Model.js (Database Schema)
+
+Ye file **MongoDB structure define karti hai**
+
+Example schema
+
+```
+User
+ ├── username
+ ├── email
+ ├── password
+ ├── verified
+ ├── createdAt
+ └── updatedAt
+```
+
+Special features
+
+```
+Pre Hook
+   │
+   ▼
+Password Hashing
+```
+
+Password encryption library:
+bcryptjs
+
+---
+
+# 9️ Mail.Service.js (Email System)
+
+Ye file **email sending system handle karti hai**
+
+Use karta hai:
+
+* Nodemailer
+* Gmail SMTP
+
+Flow
+
+```
+Controller
+   │
+   ▼
+Mail Service
+   │
+   ▼
+SMTP Server
+   │
+   ▼
+User Email
+```
+
+---
+
+# 🔗 How All Files Connect
+
+Complete request lifecycle
+
+```
+User Request
+     │
+     ▼
+Server.js
+     │
+     ▼
+App.js
+     │
+     ▼
+Auth.Routes.js
+     │
+     ▼
+Auth.Validators.js
+     │
+     ▼
+ValidateRequest.js
+     │
+     ▼
+Auth.Controller.js
+     │
+     ├──► User.Model.js → MongoDB
+     │
+     └──► Mail.Service.js → SMTP → Email
+```
+
+---
+
+Ye system **user authentication backend** create karta hai. User register aur login kar sakta hai, password securely hash hota hai, data database me save hota hai, JWT token generate hota hai, aur verification email bhi send hoti hai. 
