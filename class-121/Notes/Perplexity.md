@@ -159,30 +159,360 @@ Ab user:
 * protected features use kar sakta hai
 
 ---
+Bharat, tum jo **Perplexity AI clone** bana rahe ho uska flow basically **User → Server → AI Model → Server → User** hota hai. Main isko **diagram + simple explanation** me samjha raha hoon.
 
-# How perplexity clone working
-user--->---server---->---gemini-->--server--->---user
+---
 
-## with the hepl of ### **Chat-model**
+#  Perplexity Clone Working Flow
 
-| Field     | Type     | Description                               |
-| --------- | -------- | ----------------------------------------- |
-| _id       | ObjectId | Unique identifier for the chat            |
-| user      | ObjectId | Reference to the `User` who owns the chat |
-| title     | String   | Title of the chat session                 |
-| createdAt | Date     | Chat creation timestamp                   |
-| updatedAt | Date     | Last update timestamp                     |
+```
+        ┌──────────┐
+        │   User   │
+        └────┬─────┘
+             │
+             │ Question / Prompt
+             ▼
+      ┌──────────────┐
+      │   Backend    │
+      │    Server    │
+      └──────┬───────┘
+             │
+             │ API Request
+             ▼
+     ┌─────────────────┐
+     │   Gemini Model  │
+     │  (AI Engine)    │
+     └────────┬────────┘
+              │
+              │ AI Response
+              ▼
+      ┌──────────────┐
+      │   Backend    │
+      │    Server    │
+      └──────┬───────┘
+             │
+             │ JSON Response
+             ▼
+        ┌──────────┐
+        │   User   │
+        └──────────┘
+```
 
-### **Message-model**
+Yaha AI engine ke liye tum **Google Gemini API use karte ho.
 
-| Field     | Type     | Description                           |
-| --------- | -------- | ------------------------------------- |
-| _id       | ObjectId | Unique identifier for the message     |
-| chat      | ObjectId | Reference to the `Chat` it belongs to |
-| content   | String   | Message content                       |
-| role      | Enum     | Role of sender: `user` or `AI`        |
-| createdAt | Date     | Message creation timestamp            |
+---
+
+## Step-by-Step Explanation
+
+### 1️ User Question Ask karta hai
+
+User frontend (React website) me question likhta hai.
+
+Example:
+
+```
+What is Artificial Intelligence?
+```
+
+Frontend request bhejta hai server ko.
+
+```
+POST /api/chat
+```
+
+---
+
+### 2️ Request Server par aati hai
+
+Server (Node.js + Express) request receive karta hai.
+
+Example payload:
+
+```json
+{
+  "message": "What is Artificial Intelligence?"
+}
+```
+
+Server ka kaam:
+
+* input validate karna
+* AI API ko call karna
+* response format karna
+
+---
+
+### 3️ Server AI Model ko request bhejta hai
+
+Server prompt ko AI model ko bhejta hai.
+
+Example:
+
+```javascript
+const response = await gemini.generateContent(prompt);
+```
+
+Yaha tum use karte ho:
+
+* **Google Gemini**
+
+---
+
+### 4️ AI Model Answer Generate karta hai
+
+AI model internally:
+
+```
+Prompt Analysis
+      ↓
+Knowledge Retrieval
+      ↓
+Response Generation
+```
+
+Example response:
+
+```
+Artificial Intelligence (AI) is a technology that allows machines to mimic human intelligence...
+```
+
+---
+
+### 5️ AI Response Server ko milta hai
+
+Server response receive karta hai.
+
+Example:
+
+```json
+{
+ "response": "Artificial Intelligence is..."
+}
+```
+
+Server optionally:
+
+* format karta hai
+* markdown convert karta hai
+* sources attach karta hai
+
+---
+
+### 6️ Server Response User ko bhejta hai
+
+Server final JSON frontend ko bhejta hai.
+
+```
+{
+ "answer": "Artificial Intelligence is..."
+}
+```
+
+---
+
+### 7️ Frontend UI me show hota hai
+
+Frontend React UI me show hota hai.
+
+User ko lagta hai AI **real time answer de raha hai**.
+
+---
+Bharat, main tumhe **step-by-step setup documentation** de raha hoon jisse tum **Perplexity-style AI search clone** bana sakte ho using **LangChain + Google Gemini**.
+Yeh **sirf setup guide** hai (implementation logic nahi), exactly waise hi jaise professional docs me hota hai.
+
+---
+
+# Perplexity Clone Setup Guide
+
+Using **LangChain + Gemini (JavaScript)**
 
 
+## 1️ Project Overview
 
-[Docs-for-google-gemini](https://docs.langchain.com/oss/javascript/langchain/models)
+Perplexity clone ek **AI powered search system** hota hai jisme:
+
+* User question puchta hai
+* Backend AI model ko request bhejta hai
+* AI answer generate karta hai
+* Response UI me show hota hai
+
+System Flow:
+
+```
+User
+ ↓
+Frontend
+ ↓
+Backend API
+ ↓
+AI Model (Gemini)
+ ↓
+Backend
+ ↓
+User
+```
+
+---
+
+## 2️ Prerequisites
+
+Before starting ensure:
+
+* **Node.js 18+ installed**
+* **npm or pnpm**
+* Google AI API key
+* Basic knowledge of JavaScript
+
+Required Tools:
+
+* Node.js
+* Express
+* LangChain
+* Gemini API
+
+---
+
+## 3️ Create Project
+
+Create new backend project.
+
+```bash
+mkdir perplexity-clone
+cd perplexity-clone
+npm init -y
+```
+
+Project structure initialize ho jayega.
+
+---
+
+## 4️ Install Dependencies
+
+Install required libraries.
+
+```bash
+npm install express cors dotenv
+npm install @langchain/google-genai
+npm install langchain
+```
+
+Explanation:
+
+| Package                 | Purpose                |
+| ----------------------- | ---------------------- |
+| express                 | backend server         |
+| cors                    | frontend communication |
+| dotenv                  | environment variables  |
+| langchain               | AI framework           |
+| @langchain/google-genai | Gemini integration     |
+
+---
+
+## 5️ Create Folder Structure
+
+Recommended backend architecture:
+
+```
+perplexity-clone
+│
+├── src
+│   ├── config
+│   │   └── gemini.js
+│   │
+│   ├── controllers
+│   │   └── ai.controller.js
+│   │
+│   ├── routes
+│   │   └── ai.routes.js
+│   │
+│   └── app.js
+│
+├── server.js
+├── .env
+└── package.json
+```
+
+Ye structure **scalable backend architecture** follow karta hai.
+
+---
+
+## 6️ Get Gemini API Key
+
+1. Open
+   [https://aistudio.google.com](https://aistudio.google.com)
+
+2. Create API key.
+
+3. Copy key.
+
+---
+
+## 7️ Configure Environment Variables
+
+Create `.env` file.
+
+```
+PORT=3000
+
+GOOGLE_API_KEY=your_api_key_here
+```
+
+Environment variables secure way me API key store karte hain.
+
+---
+
+## 8️ Setup LangChain Gemini Model
+
+LangChain Gemini integration provide karta hai.
+
+Import model from:
+
+```
+@langchain/google-genai
+```
+
+Supported models example:
+
+```
+gemini-1.5-pro
+gemini-1.5-flash
+```
+
+Recommended for AI chat:
+
+```
+gemini-1.5-flash
+```
+
+Because:
+
+* faster
+* cheaper
+* optimized for chat apps
+
+---
+
+## 9️ Configure Express Server
+
+Backend server handle karega:
+
+* API requests
+* AI communication
+* response formatting
+
+Basic server responsibilities:
+
+```
+User Request
+   ↓
+API Route
+   ↓
+AI Controller
+   ↓
+Gemini Model
+   ↓
+Return Response
+```
+
+
+To be continuing ...
