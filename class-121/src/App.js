@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import authRouter from "./Routes/Auth.routes.js";
 
-
 // Load environment variables securely
 dotenv.config();
 
@@ -14,7 +13,6 @@ const app = express();
 
 // Define server port (fallback to 3000 if not provided)
 const PORT = process.env.PORT || 3000;
-
 
 //   GLOBAL MIDDLEWARES
 
@@ -26,7 +24,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Parse cookies from incoming requests
 app.use(cookieParser());
-
 
 // HEALTH CHECK ROUTE
 
@@ -45,12 +42,10 @@ app.get("/", (req, res) => {
   }
 });
 
-
 // API ROUTES
 
 // Auth routes for user authentication
 app.use("/api/auth", authRouter);
-
 
 // GLOBAL ERROR HANDLER (Fallback)
 app.use((err, req, res, next) => {
@@ -61,7 +56,6 @@ app.use((err, req, res, next) => {
     message: err.message || "Something went wrong",
   });
 });
-
 
 // Export app for server startup (separation of concerns)
 export default app;
