@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
     },
 
     // Indicates whether user email is verified
-    verified: {
+    isVerified: {
       type: Boolean,
       default: false,
     },

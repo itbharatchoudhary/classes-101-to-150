@@ -1,29 +1,45 @@
 import { Router } from "express";
-import { register, verifyEmail } from "../Controllers/Auth.controller.js";
-import { registerValidator } from "../Validators/Auth.validator.js";
+import {
+  register,
+  login,
+  logout,
+  getMe,
+  verifyEmail,
+} from "../Controllers/Auth.Controller.js";
+import {
+  registerValidator,
+  loginValidator,
+} from "../Validators/Auth.Validator.js";
+import { protect } from "../Middleware/Auth.Middleware.js";
 
 const authRouter = Router();
 
+// PUBLIC ROUTES
 /**
- * Handle user registration request with validation
+ * Register user
  */
-authRouter.post("/register", registerValidator, async (req, res, next) => {
-  try {
-    await register(req, res);
-  } catch (error) {
-    next(error);
-  }
-});
+authRouter.post("/register", registerValidator, register);
 
 /**
- * Handle email verification using token query
+ * Login user
  */
-authRouter.get("/verify-email", async (req, res, next) => {
-  try {
-    await verifyEmail(req, res);
-  } catch (error) {
-    next(error);
-  }
-});
+authRouter.post("/login", loginValidator, login);
+
+/**
+ * Verify email
+ */
+authRouter.get("/verify-email", verifyEmail);
+
+// PRIVATE ROUTES (Protected)
+
+/**
+ * Logout user (requires authentication)
+ */
+authRouter.post("/logout", protect, logout);
+
+/**
+ * Get current logged-in user
+ */
+authRouter.get("/me", protect, getMe);
 
 export default authRouter;

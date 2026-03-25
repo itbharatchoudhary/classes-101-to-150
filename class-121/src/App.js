@@ -3,7 +3,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import authRouter from "./Routes/Auth.routes.js";
+import authRouter from "./Routes/Auth.Route.js";
 
 // Load environment variables securely
 dotenv.config();

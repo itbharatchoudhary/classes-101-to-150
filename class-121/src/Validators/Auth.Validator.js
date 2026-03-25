@@ -78,3 +78,27 @@ export const registerValidator = [
   // Final middleware to check validation result
   validateRequest,
 ];
+
+/**
+ * Validation rules for user login
+ * Ensures required fields meet constraints
+ */
+export const loginValidator = [
+  // Validate email field
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email format")
+    .normalizeEmail(),
+
+  // Validate password field
+  body("password")
+    .trim()
+    .notEmpty()
+    .withMessage("Password is required"),
+
+  // Final middleware to check validation result
+  validateRequest,
+];
