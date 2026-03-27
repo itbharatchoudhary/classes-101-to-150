@@ -48,7 +48,7 @@ authRouter.get("/verify-email", verifyEmail);
 authRouter.post("/logout", authUser , logout);
 
 /**
- * @route POST/api/auth/login
+ * @route POST /api/auth/me
  * @desc  login user and enter JWT Token
  * @access Public
  * @body {email, password}
