@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
-// import { useAuth } from "../Hooks/UseAuth.js";
+import { useAuth } from "../Hooks/UseAuth.js";
 // import { useSelector } from "react-redux";
 // import { Navigate } from "react-router";
 
@@ -11,9 +11,9 @@ const Login = () => {
   //   const user = useSelector((state) => state.auth.user);
   //   const loading = useSelector((state) => state.auth.loading);
 
-  //   const { handleLogin } = useAuth();
+    const { handleLogin } = useAuth();
 
-  //   const navigate = useNavigate();
+    const navigate = useNavigate();
 
   const submitForm = async (event) => {
     event.preventDefault();
