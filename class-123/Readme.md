@@ -1,0 +1,1 @@
+[Diagram](/class-123/Notes/Diagram.png)
