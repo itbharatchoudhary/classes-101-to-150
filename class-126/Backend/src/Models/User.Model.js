@@ -1,87 +1,44 @@
-import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
-/**
- * User schema definition with validation and security fields
- */
 const userSchema = new mongoose.Schema(
-  {
-    // Stores unique username for identification
-    username: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 3,
+    {
+        username: {
+            type: String,
+            required: true,
+            trim: true,
+            unique: true,
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true,
+        },
+        password: {
+            type: String,
+            required: true,
+            minlength: 6,
+        },
+        verified: {
+            type: Boolean,
+            default: false,
+        },
     },
-
-    // Stores unique email in lowercase format
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-
-    // Stores hashed password (excluded from queries)
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
-      select: false,
-    },
-
-    // Indicates whether user email is verified
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-
-    // Stores email verification token
-    verificationToken: {
-      type: String,
-    },
-
-    // Stores token expiration timestamp
-    verificationTokenExpires: {
-      type: Date,
-    },
-  },
-  {
-    timestamps: true, // Adds createdAt and updatedAt
-  },
+    { timestamps: true }
 );
 
-/**
- * Hash password before saving user
- * Ensures password is encrypted securely
- */
-userSchema.pre("save", async function () {
-  try {
-    // Skip hashing if password unchanged
-    if (!this.isModified("password")) return;
-
-    const SALT_ROUNDS = 10;
-
-    // Hash password using bcrypt
-    this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
-  } catch (error) {}
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
+    this.password = await bcrypt.hash(this.password, 10);
 });
 
-/**
- * Compare input password with stored hash
- * @param {string} candidatePassword - Plain password input
- * @returns {Promise<boolean>} - Match result
- */
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  try {
-    // Compare hashed password securely
-    return await bcrypt.compare(candidatePassword, this.password);
-  } catch (error) {
-    throw new Error("Password comparison failed");
-  }
+userSchema.methods.comparePassword = function (candidatePassword) {
+    return bcrypt.compare(candidatePassword, this.password);
 };
 
-const UserModel = mongoose.model("User", userSchema);
 
-export default UserModel;
+const userModel = mongoose.model('User', userSchema);
+
+export default userModel;

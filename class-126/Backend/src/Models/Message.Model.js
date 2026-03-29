@@ -1,39 +1,25 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-/**
- * Define schema for storing chat messages
- * Ensures structured message storage with validation
- */
 const messageSchema = new mongoose.Schema(
-  {
-    // Reference to associated chat document
-    chat: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Chat",
-      required: true,
+    {
+        chat: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Chat',
+            required: true,
+        },
+        content: {
+            type: String,
+            required: true,
+        },
+        role: {
+            type: String,
+            enum: [ 'user', 'ai' ],
+            required: true,
+        },
     },
-
-    // Store message content with trimming
-    content: {
-      type: String,
-      required: [true, "Message content is required"],
-      trim: true,
-    },
-
-    // Define sender role (user or AI)
-    role: {
-      type: String,
-      enum: ["user", "ai"],
-      required: true,
-    },
-  },
-  {
-    // Automatically manage createdAt and updatedAt
-    timestamps: true,
-  }
+    { timestamps: true }
 );
 
+const messageModel = mongoose.model('Message', messageSchema);
 
-const MessageModel = mongoose.model("Message", messageSchema);
-
-export default MessageModel;
+export default messageModel;
