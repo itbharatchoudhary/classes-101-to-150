@@ -92,3 +92,20 @@ npm install @langchain/cohere
 npm install @langchain/langgraph @langchain/core
 → Installs LangGraph for building agent workflows and reinstalls LangChain core
 ```
+
+
+
+PS C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-137> npm i -D typescript tsx
+
+added 6 packages, and audited 83 packages in 6s
+
+24 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+PS C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-137> npx tsc --init
+
+Created a new tsconfig.json                                    
+                                                            TS 
+You can learn more at https://aka.ms/tsconfig
+PS C:\Users\LENOVO\OneDrive\Desktop\my work\classes-101-to-150\class-137>
