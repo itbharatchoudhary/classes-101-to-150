@@ -9,7 +9,7 @@ res.status(200).json({status:'ok'})
 })
 
 app.post("/use-graph",async(req,res)=>{
-    await useGraph("What is the capital of india")
+    await useGraph("write an factorial function in javascript")
 
 })
 
