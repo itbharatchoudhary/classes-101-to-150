@@ -1,4 +1,4 @@
-import { StateSchema, MessagesValue, GraphNode, StateGraph, START, END } from "@langchain/langgraph";
+import { StateSchema, MessagesValue, StateGraph, START, END } from "@langchain/langgraph";
 
 type JUDGEMENT = {
     winner:"solution_1" | "solution_2";
