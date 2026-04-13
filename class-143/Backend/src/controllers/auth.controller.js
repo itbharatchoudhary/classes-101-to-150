@@ -1,8 +1,9 @@
 import { config } from "../config/config.js";
 import userModel from "../model/user.model.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
-async function sendTOkenResponse(user, res, message) {
+async function sendTokenResponse(user, res, message) {
 
     const token = jwt.sign({
         id: user._id
@@ -20,7 +21,7 @@ async function sendTOkenResponse(user, res, message) {
 
     res.status(200).json({
         success: true,
-        message: "Login successful",
+        message, //  dynamic
         user: {
             id: user._id,
             email: user.email,
@@ -28,7 +29,6 @@ async function sendTOkenResponse(user, res, message) {
             contact: user.contact,
             role: user.role
         }
-
     });
 }
 
@@ -54,9 +54,37 @@ export const registerUser = async (req, res) => {
             role: isSeller ? "seller" : "buyer"
         });
 
-        await sendTOkenResponse(user, res, "Registration successful");
+        await sendTokenResponse(user, res, "Registration successful");
 
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 }
+
+
+
+export const loginUser = async (req, res) => { 
+    try {
+        const { email, password } = req.body;
+
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
+
+        // ✅ FIX 1: use bcrypt
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
+
+        // ✅ FIX 2: actually CALL the function
+        await sendTokenResponse(user, res, "Login successful");
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+};

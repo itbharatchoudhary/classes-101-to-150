@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from "../hook/useAuth"
-import { useNavigate } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 
 const Register = () => {
 
@@ -134,9 +134,7 @@ const Register = () => {
                         {/* FOOTER */}
                         <p className="text-sm text-center text-[#9f987f]">
                             Already have an account?{" "}
-                            <a href="/login" className="text-[#FFD700] hover:underline">
-                                Sign in
-                            </a>
+                            <Link to="/login" className="text-[#FFD700] hover:underline">Sign in</Link>
                         </p>
 
                     </form>
