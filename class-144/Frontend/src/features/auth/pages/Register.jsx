@@ -122,6 +122,14 @@ const Register = () => {
                             Register as Seller
                         </label>
 
+                        <a
+                            href="/api/auth/google"
+                            className="mt-2 bg-[#4285F4] text-white py-2.5 font-semibold rounded-md hover:opacity-90 transition flex items-center justify-center gap-2"
+                        >
+                            <img src="public/GoogleIcon.jpg" alt="Google" className="w-7 h-6 border border-[#3a3525] rounded-full" />
+                            Sign up with Google
+                        </a>
+
                         {/* BUTTON */}
                         <button
                             type="submit"

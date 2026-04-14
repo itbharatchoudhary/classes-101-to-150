@@ -3,6 +3,10 @@ import userModel from "../model/user.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
+/**
+ * @description Helper function to generate JWT token, set cookie and send response
+ */
+
 async function sendTokenResponse(user, res, message) {
 
     const token = jwt.sign({
@@ -31,6 +35,11 @@ async function sendTokenResponse(user, res, message) {
         }
     });
 }
+
+/**
+ * @Required email, password, fullname, contact, role
+ * @Description Register a new user
+ */
 
 export const registerUser = async (req, res) => {
     const { email, password, fullname, contact, isSeller } = req.body;
@@ -61,7 +70,10 @@ export const registerUser = async (req, res) => {
     }
 }
 
-
+/**
+ * @Required email, password    
+ * @Description Login a user
+ */
 
 export const loginUser = async (req, res) => { 
     try {
@@ -88,3 +100,10 @@ export const loginUser = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+
+export const googleCallback = async (req, res) => {
+    console.log(req.user)
+
+    res.redirect("http://localhost:5173/")
+}
