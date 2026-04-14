@@ -33,4 +33,4 @@
 4.  **Browser ka Faisla:** Agar server ke headers sahi hain, to browser asli request ko proceed kar deta hai aur response ko JavaScript ko dikhata hai. Nahi to, CORS error aata hai. 
 
 
-===
+---
