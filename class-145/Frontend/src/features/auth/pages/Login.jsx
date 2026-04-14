@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from "../hook/useAuth";
 import { useNavigate, Link } from "react-router";
+import GoogleBtn from '../components/GoogleBtn';
 
 
 const Login = () => {
@@ -110,6 +111,8 @@ const Login = () => {
                                 className="w-full bg-[#1a1a1a] border border-[#3a3525] rounded-md px-3 py-2 text-white outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] transition"
                             />
                         </div>
+
+                        <GoogleBtn />
 
                         {/* BUTTON */}
                         <button
