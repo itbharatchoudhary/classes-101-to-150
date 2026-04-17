@@ -56,6 +56,11 @@ export const getSellerProducts = async (req, res) => {
     })
 }
 
+/**
+ * @desc Get all products
+ * @route GET /products
+ * @access Public
+ */
 export const getAllProducts = async (req, res) => {
     const products = await ProductModel.find()
 
@@ -65,5 +70,30 @@ export const getAllProducts = async (req, res) => {
         products
     })
 
+}
+
+/**
+ * @desc Get product details by ID
+ * @route GET /products/:id 
+ * @access Public
+ * @params { id } - Product ID
+ */
+export const getProductDetails = async (req, res) => {
+    const { id } = req.params;
+
+    const product = await ProductModel.findById(id)
+
+    if (!product) {
+        return res.status(404).json({
+            message: "Product not found",
+            success: false
+        })
+    }
+
+    return res.status(200).json({
+        message: "Product details retrieved successfully",
+        success: true,
+        product
+    })
 }
 
