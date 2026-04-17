@@ -1,17 +1,22 @@
-import {createSlice} from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+// import { set } from "mongoose";
 
 const productSlice = createSlice({
-    name:"product",
-    initialState:{  
-        sellerProducts:[],
+    name: "product",
+    initialState: {
+        sellerProducts: [],
+        products: []
     },
-    reducers:{
-        setSellerProducts:(state,action)=>{
+    reducers: {
+        setSellerProducts: (state, action) => {
             state.sellerProducts = action.payload;
+        },
+        setProducts: (state, action) => {
+            state.products = action.payload;
         }
     }
 })
 
-export const {setSellerProducts} = productSlice.actions;
+export const { setSellerProducts, setProducts } = productSlice.actions;
 
 export default productSlice.reducer;

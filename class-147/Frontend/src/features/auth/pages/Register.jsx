@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router';
 import GoogleBtn from '../components/GoogleBtn';
 
 const Register = () => {
-
     const { handleRegister } = useAuth();
     const navigate = useNavigate();
 
@@ -18,10 +17,7 @@ const Register = () => {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
     const handleSubmit = async (e) => {
@@ -36,117 +32,275 @@ const Register = () => {
         navigate("/");
     };
 
+    const inputStyle = {
+        color: '#1b1c1a',
+        borderBottom: '1px solid #d0c5b5',
+        fontFamily: "'Inter', sans-serif"
+    };
+
+    const handleFocus = (e) => { e.target.style.borderBottomColor = '#C9A96E'; };
+    const handleBlur = (e) => { e.target.style.borderBottomColor = '#d0c5b5'; };
+
     return (
-        <div className="min-h-screen flex flex-col lg:flex-row bg-[#0e0e0e] text-[#e5e2e1]">
+        <>
+            {/* Google Fonts */}
+            <link
+                href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap"
+                rel="stylesheet"
+            />
 
-            {/* LEFT SIDE */}
-            <div className="hidden lg:flex lg:w-1/2 relative border-r border-[#1c1b1b]">
-
-                <img
-                    src="/snitch_editorial.png"
-                    alt="Snitch"
-                    className="absolute inset-0 w-full h-full object-cover opacity-50"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent"></div>
-
-                <div className="relative z-10 flex flex-col justify-between h-full w-full px-12 py-12">
-
-                    <h2 className="text-[#FFD700] text-sm tracking-widest uppercase">
-                        Snitch
-                    </h2>
-
-                    <div>
-                        <h1 className="text-4xl font-bold leading-tight mb-4">
-                            Define your aesthetic.
-                        </h1>
-
-                        <p className="text-sm text-[#bdb6a0] max-w-sm">
-                            Join creators and brands shaping modern fashion.
-                        </p>
+            <div
+                className="min-h-screen flex flex-col lg:flex-row selection:bg-[#C9A96E]/30"
+                style={{ backgroundColor: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
+            >
+                {/* ── LEFT: Editorial Image Panel ── */}
+                <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden" style={{ backgroundColor: '#f5f3f0' }}>
+                    <img
+                        src="/snitch_editorial_2.png"
+                        alt="Snitch Fashion Editorial"
+                        className="absolute inset-0 w-full h-full object-cover object-top"
+                        style={{ filter: 'brightness(0.97)' }}
+                    />
+                    <div
+                        className="absolute inset-0"
+                        style={{ background: 'linear-gradient(to top, rgba(27,24,20,0.62) 0%, rgba(27,24,20,0.08) 45%, transparent 100%)' }}
+                    />
+                    <div className="absolute inset-0 p-14 flex flex-col justify-between z-10">
+                        <span
+                            className="text-sm font-medium tracking-[0.35em] uppercase"
+                            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
+                        >
+                            Snitch.
+                        </span>
+                        <div>
+                            <p
+                                className="text-5xl xl:text-6xl font-light leading-[1.08] text-white mb-5"
+                                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                            >
+                                Define your<br />
+                                <em>aesthetic.</em>
+                            </p>
+                            <p className="text-sm font-light leading-relaxed max-w-xs" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                                Join the exclusive movement of creators and brands redefining the modern fashion landscape.
+                            </p>
+                        </div>
                     </div>
-
                 </div>
-            </div>
 
-            {/* RIGHT SIDE */}
-            <div className="w-full lg:w-1/2 flex justify-center px-6 sm:px-12 lg:px-20 py-10">
+                {/* ── RIGHT: Form Panel ── */}
+                <div
+                    className="w-full lg:w-1/2 flex items-center justify-center min-h-screen px-8 sm:px-14 lg:px-20 py-16 overflow-y-auto"
+                    style={{ backgroundColor: '#fbf9f6' }}
+                >
+                    <div className="w-full max-w-sm">
 
-                {/* Scroll-safe container */}
-                <div className="w-full max-w-sm flex flex-col justify-center">
-
-                    {/* HEADER */}
-                    <div className="mb-8">
-                        <p className="text-xs uppercase tracking-[0.2em] text-[#FFD700] mb-2">
-                            Welcome
-                        </p>
-                        <h1 className="text-2xl font-semibold leading-tight">
-                            Create Account
-                        </h1>
-                    </div>
-
-                    {/* FORM */}
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-
-                        {[
-                            { label: "Full Name", name: "fullName", type: "text" },
-                            { label: "Contact Number", name: "contactNumber", type: "tel" },
-                            { label: "Email Address", name: "email", type: "email" },
-                            { label: "Password", name: "password", type: "password" }
-                        ].map((field) => (
-                            <div key={field.name} className="flex flex-col gap-1.5">
-                                <label className="text-sm text-[#bdb6a5]">
-                                    {field.label}
-                                </label>
-                                <input
-                                    type={field.type}
-                                    name={field.name}
-                                    value={formData[field.name]}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full bg-[#1a1a1a] border border-[#3a3525] rounded-md px-3 py-2.5 text-white outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] transition-all duration-200"
-                                />
-                            </div>
-                        ))}
-
-                        {/* CHECKBOX */}
-                        <label className="flex items-center gap-2 text-sm cursor-pointer mt-1">
-                            <input
-                                type="checkbox"
-                                name="isSeller"
-                                checked={formData.isSeller}
-                                onChange={handleChange}
-                                className="w-4 h-4 accent-[#FFD700]"
-                            />
-                            Register as Seller
-                        </label>
-
-                        {/* GOOGLE BUTTON */}
-                        <div className="pt-2">
-                            <GoogleBtn />
+                        {/* Mobile brand mark */}
+                        <div className="lg:hidden mb-14">
+                            <span
+                                className="text-sm tracking-[0.35em] uppercase"
+                                style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
+                            >
+                                Snitch.
+                            </span>
                         </div>
 
-                        {/* SUBMIT BUTTON */}
-                        <button
-                            type="submit"
-                            className="mt-3 bg-[#FFD700] text-black py-2.5 font-semibold rounded-md 
-                            hover:opacity-90 transition-all duration-200"
-                        >
-                            Sign Up
-                        </button>
+                        {/* Header */}
+                        <div className="mb-12">
+                            <p
+                                className="text-[10px] uppercase tracking-[0.22em] mb-4 font-medium"
+                                style={{ color: '#C9A96E' }}
+                            >
+                                Welcome to Snitch
+                            </p>
+                            <h1
+                                className="text-[2.6rem] xl:text-5xl font-light leading-[1.1]"
+                                style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1b1c1a' }}
+                            >
+                                Elevate Your Style
+                            </h1>
+                        </div>
 
-                        {/* FOOTER */}
-                        <p className="text-sm text-center text-[#9f987f] mt-2">
-                            Already have an account?{" "}
-                            <Link to="/login" className="text-[#FFD700] hover:underline">
-                                Sign in
-                            </Link>
-                        </p>
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-9">
 
-                    </form>
+                            {/* Full Name */}
+                            <div className="flex flex-col gap-2">
+                                <label
+                                    htmlFor="reg-fullName"
+                                    className="text-[10px] uppercase tracking-[0.18em] font-medium"
+                                    style={{ color: '#7A6E63' }}
+                                >
+                                    Full Name
+                                </label>
+                                <input
+                                    id="reg-fullName"
+                                    type="text"
+                                    name="fullName"
+                                    value={formData.fullName}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="e.g. John Doe"
+                                    className="w-full bg-transparent outline-none py-3 text-sm transition-colors duration-300"
+                                    style={inputStyle}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
+                                />
+                            </div>
+
+                            {/* Contact Number */}
+                            <div className="flex flex-col gap-2">
+                                <label
+                                    htmlFor="reg-contact"
+                                    className="text-[10px] uppercase tracking-[0.18em] font-medium"
+                                    style={{ color: '#7A6E63' }}
+                                >
+                                    Contact Number
+                                </label>
+                                <input
+                                    id="reg-contact"
+                                    type="tel"
+                                    name="contactNumber"
+                                    value={formData.contactNumber}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="+91 98765 43210"
+                                    className="w-full bg-transparent outline-none py-3 text-sm transition-colors duration-300"
+                                    style={inputStyle}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
+                                />
+                            </div>
+
+                            {/* Email */}
+                            <div className="flex flex-col gap-2">
+                                <label
+                                    htmlFor="reg-email"
+                                    className="text-[10px] uppercase tracking-[0.18em] font-medium"
+                                    style={{ color: '#7A6E63' }}
+                                >
+                                    Email Address
+                                </label>
+                                <input
+                                    id="reg-email"
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="hello@example.com"
+                                    className="w-full bg-transparent outline-none py-3 text-sm transition-colors duration-300"
+                                    style={inputStyle}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
+                                />
+                            </div>
+
+                            {/* Password */}
+                            <div className="flex flex-col gap-2">
+                                <label
+                                    htmlFor="reg-password"
+                                    className="text-[10px] uppercase tracking-[0.18em] font-medium"
+                                    style={{ color: '#7A6E63' }}
+                                >
+                                    Password
+                                </label>
+                                <input
+                                    id="reg-password"
+                                    type="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="••••••••"
+                                    className="w-full bg-transparent outline-none py-3 text-sm transition-colors duration-300"
+                                    style={inputStyle}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
+                                />
+                            </div>
+
+                            {/* Register as Seller — minimal checkbox */}
+                            <label
+                                htmlFor="reg-isSeller"
+                                className="flex items-center gap-4 cursor-pointer group"
+                            >
+                                <div className="relative flex-shrink-0">
+                                    <input
+                                        id="reg-isSeller"
+                                        type="checkbox"
+                                        name="isSeller"
+                                        checked={formData.isSeller}
+                                        onChange={handleChange}
+                                        className="peer sr-only"
+                                    />
+                                    {/* Custom checkbox */}
+                                    <div
+                                        className="w-4 h-4 border transition-all duration-200 flex items-center justify-center peer-checked:border-[#C9A96E]"
+                                        style={{
+                                            borderColor: formData.isSeller ? '#C9A96E' : '#d0c5b5',
+                                            backgroundColor: formData.isSeller ? '#C9A96E' : 'transparent'
+                                        }}
+                                    >
+                                        {formData.isSeller && (
+                                            <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
+                                                <path d="M2 6l3 3 5-5" stroke="#fbf9f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                </div>
+                                <span
+                                    className="text-[11px] uppercase tracking-[0.15em] transition-colors duration-200"
+                                    style={{ color: formData.isSeller ? '#C9A96E' : '#7A6E63' }}
+                                >
+                                    Register as Seller
+                                </span>
+                            </label>
+
+                            {/* Sign Up Button */}
+                            <button
+                                type="submit"
+                                className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 mt-2"
+                                style={{ backgroundColor: '#1b1c1a', color: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.backgroundColor = '#C9A96E';
+                                    e.currentTarget.style.color = '#1b1c1a';
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.backgroundColor = '#1b1c1a';
+                                    e.currentTarget.style.color = '#fbf9f6';
+                                }}
+                            >
+                                Sign Up
+                            </button>
+
+                            {/* Divider */}
+                            <div className="flex items-center gap-4">
+                                <div className="flex-1 h-px" style={{ backgroundColor: '#e4e2df' }} />
+                                <span className="text-[10px] uppercase tracking-[0.15em]" style={{ color: '#B5ADA3' }}>or</span>
+                                <div className="flex-1 h-px" style={{ backgroundColor: '#e4e2df' }} />
+                            </div>
+
+                            {/* Google SSO */}
+                            < GoogleBtn />
+
+                            {/* Footer Link */}
+                            <p className="text-center text-[11px]" style={{ color: '#B5ADA3' }}>
+                                Already have an account?{' '}
+                                <a
+                                    href="/login"
+                                    className="transition-colors duration-200"
+                                    style={{ color: '#7A6E63', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                                    onMouseEnter={e => e.target.style.color = '#C9A96E'}
+                                    onMouseLeave={e => e.target.style.color = '#7A6E63'}
+                                >
+                                    Sign in
+                                </a>
+                            </p>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
